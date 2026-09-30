@@ -8,8 +8,8 @@ public class SchoolProfile : Profile
 {
     public SchoolProfile()
     {
-        CreateMap<SchoolRequestDto, School>();
-        CreateMap<School, SchoolListDto>();
-        CreateMap<School, SchoolResponseDto>();
+        CreateMap<SchoolRequestDto, Domain.Model.School>();
+        CreateMap<Domain.Model.School, SchoolListDto>();
+        CreateMap<Domain.Model.School, SchoolResponseDto>();
     }
 }

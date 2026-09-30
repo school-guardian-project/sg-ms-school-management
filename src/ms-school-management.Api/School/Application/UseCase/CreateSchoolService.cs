@@ -19,7 +19,7 @@ public sealed class CreateSchoolService : ICreateSchoolUseCase
 
     public async Task<Guid> ExecuteAsync(SchoolRequestDto request)
     {
-        var school = _mapper.Map<School>(request);
+        var school = _mapper.Map<Domain.Model.School>(request);
         school.Id = Guid.NewGuid();
         school.Status = Status.Active;
 

@@ -14,7 +14,8 @@ RUN dotnet build "./ms-school-management.Api.csproj" -c $BUILD_CONFIGURATION -o 
 
 FROM build AS publish
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet publish "./ms-school-management.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publish /p:UseAppHost=false
+WORKDIR "/src/src/ms-school-management.Api"
+RUN dotnet publish "./ms-school-management.Api.csproj" -c $BUILD_CONFIGURATION -o /App/publish /p:UseAppHost=false
 
 FROM base AS final
 WORKDIR /app
