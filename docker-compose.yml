@@ -1,0 +1,28 @@
+services:
+  ms-school-management.api:
+    container_name: ms-school-management
+    image: ms-school-management.api
+    build:
+      context: .
+      dockerfile: src/ms-school-management.Api/Dockerfile
+    ports:
+      - "8081:8080"
+    env_file:
+      - .env
+    networks:
+      - sg-services-network
+
+  ms-school-management.tests:
+    container_name: ms-school-management-tests
+    image: mcr.microsoft.com/dotnet/sdk:10.0
+    working_dir: /src
+    volumes:
+      - ./:/src
+    command: dotnet test ./tests/ms-school-management.Tests/ --nologo
+    profiles: [ "tests" ]
+    networks:
+      - sg-services-network
+
+networks:
+  sg-services-network:
+    external: true

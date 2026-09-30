@@ -1,0 +1,10 @@
+**/.dockerignore
+**/.env
+**/.git
+**/bin
+**/obj
+**/node_modules
+**/README.md
+**/.idea
+**/.vs
+**/tests
