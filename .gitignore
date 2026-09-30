@@ -10,5 +10,5 @@ tests/**/obj*/
 
 src/ms-school-management.Api/Config
 
-bib/
+bin/
 obj/
