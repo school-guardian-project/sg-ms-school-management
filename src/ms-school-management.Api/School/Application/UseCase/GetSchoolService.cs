@@ -19,6 +19,11 @@ public sealed class GetSchoolService : IGetSchoolUseCase
     public async Task<SchoolResponseDto?> ExecuteAsync(Guid id)
     {
         var school = await _repository.FindByIdAsync(id);
-        return school is null ? null : _mapper.Map<SchoolResponseDto>(school);
+        if (school is null) return null;
+
+        var dto = _mapper.Map<SchoolResponseDto>(school);
+        var cityName = await _repository.GetCityNameAsync(school.CityId);
+
+        return dto with { CityName = cityName ?? string.Empty };
     }
 }
