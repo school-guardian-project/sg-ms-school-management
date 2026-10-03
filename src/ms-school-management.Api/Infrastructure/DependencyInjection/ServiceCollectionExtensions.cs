@@ -1,6 +1,8 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ms_school_management.Api.School.Application.Search;
+using ms_school_management.Api.School.Application.Search.Strategy;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
@@ -22,6 +24,9 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
         services.AddScoped<IUpdateSchoolUseCase, UpdateSchoolService>();
         services.AddScoped<IDeleteSchoolUseCase, DeleteSchoolService>();
+
+        services.AddScoped<ISchoolSearchStrategy, NameSearchStrategy>();
+        services.AddScoped<ISearchSchoolsUseCase, SearchSchoolsService>();
 
         return services;
     }
