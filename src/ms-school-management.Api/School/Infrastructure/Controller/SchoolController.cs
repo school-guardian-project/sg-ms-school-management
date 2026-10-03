@@ -13,19 +13,22 @@ public sealed class SchoolController : ControllerBase
     private readonly IListSchoolsUseCase _listSchools;
     private readonly IUpdateSchoolUseCase _updateSchool;
     private readonly IDeleteSchoolUseCase _deleteSchool;
+    private readonly ISearchSchoolsUseCase _searchSchools;
 
     public SchoolController(
         ICreateSchoolUseCase createSchool,
         IGetSchoolUseCase getSchool,
         IListSchoolsUseCase listSchools,
         IUpdateSchoolUseCase updateSchool,
-        IDeleteSchoolUseCase deleteSchool)
+        IDeleteSchoolUseCase deleteSchool,
+        ISearchSchoolsUseCase searchSchools)
     {
         _createSchool = createSchool;
         _getSchool = getSchool;
         _listSchools = listSchools;
         _updateSchool = updateSchool;
         _deleteSchool = deleteSchool;
+        _searchSchools = searchSchools;
     }
 
     [HttpPost]
@@ -39,6 +42,13 @@ public sealed class SchoolController : ControllerBase
     public async Task<IActionResult> List()
     {
         var schools = await _listSchools.ExecuteAsync();
+        return Ok(schools);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search)
+    {
+        var schools = await _searchSchools.ExecuteAsync(search);
         return Ok(schools);
     }
 
