@@ -17,5 +17,10 @@ public class SchoolManagementContext : DbContext
         modelBuilder.ApplyConfiguration(new SchoolConfiguration());
         modelBuilder.ApplyConfiguration(new SchoolCampusConfiguration());
         modelBuilder.ApplyConfiguration(new CourseConfiguration());
+
+        // Solo lectura: la ciudad que muestra el modal de la escuela vive en el esquema Geographic.
+        modelBuilder.Entity<CityRefEntity>()
+            .HasNoKey()
+            .ToTable("City", "Geographic");
     }
 }

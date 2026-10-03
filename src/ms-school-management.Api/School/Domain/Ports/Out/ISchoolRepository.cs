@@ -9,4 +9,5 @@ public interface ISchoolRepository
     Task<IReadOnlyList<Domain.Model.School>> FindAllAsync();
     Task UpdateAsync(Domain.Model.School school);
     Task DeleteAsync(Guid id);
+    Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default);
 }
