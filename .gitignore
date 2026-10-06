@@ -1,0 +1,14 @@
+.env
+
+src/ms-school-management.Api/bin
+src/ms-school-management.Api/obj
+src/ms-school-management.Api/appsettings.*
+tests/**/bin*/
+tests/**/obj*/
+
+.idea
+
+src/ms-school-management.Api/Config
+
+bin/
+obj/
