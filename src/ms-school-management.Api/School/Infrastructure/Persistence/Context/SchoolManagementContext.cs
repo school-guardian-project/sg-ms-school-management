@@ -11,12 +11,14 @@ public class SchoolManagementContext : DbContext
     public DbSet<SchoolEntity> Schools => Set<SchoolEntity>();
     public DbSet<SchoolCampusEntity> Campuses => Set<SchoolCampusEntity>();
     public DbSet<CourseEntity> Courses => Set<CourseEntity>();
+    public DbSet<SchoolAdminEntity> SchoolAdmins => Set<SchoolAdminEntity>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfiguration(new SchoolConfiguration());
         modelBuilder.ApplyConfiguration(new SchoolCampusConfiguration());
         modelBuilder.ApplyConfiguration(new CourseConfiguration());
+        modelBuilder.ApplyConfiguration(new SchoolAdminConfiguration());
 
         // Solo lectura: la ciudad que muestra el modal de la escuela vive en el esquema Geographic.
         modelBuilder.Entity<CityRefEntity>()

@@ -28,6 +28,16 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ISchoolSearchStrategy, NameSearchStrategy>();
         services.AddScoped<ISearchSchoolsUseCase, SearchSchoolsService>();
 
+        services.AddScoped<ICampusRepository, CampusRepositoryImpl>();
+        services.AddScoped<IListCampusesBySchoolUseCase, ListCampusesBySchoolService>();
+
+        services.AddScoped<ISchoolAdminRepository, SchoolAdminRepositoryImpl>();
+        services.AddScoped<ILinkAdminSchoolUseCase, LinkAdminSchoolService>();
+        services.AddScoped<IGetAdminSchoolUseCase, GetAdminSchoolService>();
+        services.AddScoped<IGetCampusUseCase, GetCampusService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICreateSchoolWithCampusesUseCase, CreateSchoolWithCampusesService>();
+
         return services;
     }
 }
