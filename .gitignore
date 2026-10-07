@@ -12,3 +12,5 @@ src/ms-school-management.Api/Config
 
 bin/
 obj/
+
+graphify-*
