@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ms_school_management.Api.Infrastructure.Tenancy;
 using ms_school_management.Api.School.Application.Search;
 using ms_school_management.Api.School.Application.Search.Strategy;
 using ms_school_management.Api.School.Application.UseCase;
@@ -19,6 +20,10 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<ISchoolRepository, SchoolRepositoryImpl>();
+        services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+        services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddScoped<ITenantSchoolResolver, TenantSchoolResolver>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
