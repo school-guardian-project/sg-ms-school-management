@@ -35,7 +35,10 @@ public class SearchSchoolsServiceTests
 
     private static SearchSchoolsService CreateService(params SchoolModel[] schools)
     {
-        var listUseCase = new ListSchoolsService(new FakeSchoolRepository(schools), CreateMapper());
+        var listUseCase = new ListSchoolsService(
+            new FakeSchoolRepository(schools),
+            new NoFilterTenantSchoolResolver(),
+            CreateMapper());
         return new SearchSchoolsService(listUseCase, new ISchoolSearchStrategy[]
         {
             new NameSearchStrategy()
@@ -82,6 +85,12 @@ public class SearchSchoolsServiceTests
         var service = CreateService(NewSchool("San Martin", "Calle 1"));
 
         Assert.Empty(await service.ExecuteAsync("inexistente"));
+    }
+
+    private sealed class NoFilterTenantSchoolResolver : ITenantSchoolResolver
+    {
+        public Task<Guid?> ResolveAllowedSchoolIdAsync(CancellationToken ct = default) =>
+            Task.FromResult<Guid?>(null);
     }
 
     private sealed class FakeSchoolRepository : ISchoolRepository
