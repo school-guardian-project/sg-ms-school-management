@@ -7,6 +7,10 @@ services:
       dockerfile: src/ms-school-management.Api/Dockerfile
     ports:
       - "8080"
+      # Puerto gRPC (h2c). No se publica en el host: solo lo consumen otros
+      # contenedores de sg-services-network. Se mapea igualmente para poder
+      # depurar con grpcurl desde la maquina.
+      - "5001"
     env_file:
       - .env
     networks:

@@ -1,6 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ms_school_management.Api.Infrastructure.Tenancy;
+using ms_school_management.Api.School.Application.Search;
+using ms_school_management.Api.School.Application.Search.Strategy;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
@@ -17,11 +20,28 @@ public static class ServiceCollectionExtensions
             options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 
         services.AddScoped<ISchoolRepository, SchoolRepositoryImpl>();
+        services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+        services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddScoped<ITenantSchoolResolver, TenantSchoolResolver>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
         services.AddScoped<IUpdateSchoolUseCase, UpdateSchoolService>();
         services.AddScoped<IDeleteSchoolUseCase, DeleteSchoolService>();
+
+        services.AddScoped<ISchoolSearchStrategy, NameSearchStrategy>();
+        services.AddScoped<ISearchSchoolsUseCase, SearchSchoolsService>();
+
+        services.AddScoped<ICampusRepository, CampusRepositoryImpl>();
+        services.AddScoped<IListCampusesBySchoolUseCase, ListCampusesBySchoolService>();
+
+        services.AddScoped<ISchoolAdminRepository, SchoolAdminRepositoryImpl>();
+        services.AddScoped<ILinkAdminSchoolUseCase, LinkAdminSchoolService>();
+        services.AddScoped<IGetAdminSchoolUseCase, GetAdminSchoolService>();
+        services.AddScoped<IGetCampusUseCase, GetCampusService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddScoped<ICreateSchoolWithCampusesUseCase, CreateSchoolWithCampusesService>();
 
         return services;
     }
