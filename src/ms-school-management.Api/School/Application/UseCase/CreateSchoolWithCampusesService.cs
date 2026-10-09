@@ -35,6 +35,8 @@ public sealed class CreateSchoolWithCampusesService : ICreateSchoolWithCampusesU
             Longitude = campus.Longitude,
             Status = Status.Active,
         }).ToList();
+        if (!campuses.Any(campus => string.Equals(campus.Name, SchoolCampus.CentralName, StringComparison.OrdinalIgnoreCase)))
+            campuses.Insert(0, SchoolCampus.Central(school));
 
         await _repository.SaveWithCampusesAsync(school, campuses);
         return new SchoolWithCampusesResponseDto(

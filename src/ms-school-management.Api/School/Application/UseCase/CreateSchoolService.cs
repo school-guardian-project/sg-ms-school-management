@@ -24,7 +24,7 @@ public sealed class CreateSchoolService : ICreateSchoolUseCase
         school.Id = Guid.NewGuid();
         school.Status = Status.Active;
 
-        await _repository.SaveAsync(school);
+        await _repository.SaveWithCampusesAsync(school, [SchoolCampus.Central(school)]);
         return school.Id;
     }
 }
