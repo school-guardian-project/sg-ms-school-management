@@ -6,9 +6,3 @@ public interface ICreateSchoolUseCase
 {
     Task<Guid> ExecuteAsync(SchoolRequestDto request);
 }
-
-/// <summary>Alta de colegio con sus sedes en una sola transaccion.</summary>
-public interface ICreateSchoolWithCampusesUseCase
-{
-    Task<CreateSchoolWithCampusesResponseDto> ExecuteAsync(CreateSchoolWithCampusesDto request);
-}

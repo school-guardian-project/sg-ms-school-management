@@ -8,6 +8,9 @@ Para conservar compatibilidad con clientes anteriores, si el POST ya incluye una
 sede llamada `Sede central` (sin distinguir mayusculas), se conserva esa sede
 explicita y no se crea una segunda con el mismo nombre.
 
+El controlador utiliza `SchoolWithCampusesRequestDto` y el unico caso de uso
+`CreateSchoolWithCampusesService`, que recibe direcciones y coordenadas por sede.
+
 Las migraciones de `database/ms-school-db/01-ddl/04-alter` mantienen las columnas
 de ubicacion y crean una sede central en colegios activos que no tienen ninguna
 sede, sin duplicar ni modificar las sedes existentes.

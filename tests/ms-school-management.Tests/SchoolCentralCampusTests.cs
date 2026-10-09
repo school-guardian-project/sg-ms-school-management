@@ -29,6 +29,8 @@ public class SchoolCentralCampusTests
         public Task UpdateWithCampusesAsync(SchoolModel school, IReadOnlyList<SchoolCampus> campuses) => throw new NotSupportedException();
         public Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId) => throw new NotSupportedException();
         public Task DeleteAsync(Guid id) => throw new NotSupportedException();
+        public Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default) =>
+            throw new NotSupportedException();
     }
 
     private static IMapper Mapper()
