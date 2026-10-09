@@ -12,4 +12,5 @@ public record SchoolResponseDto(
     string Email,
     string? Website,
     string? Theme,
-    string Status);
+    string Status,
+    string CityName = "");

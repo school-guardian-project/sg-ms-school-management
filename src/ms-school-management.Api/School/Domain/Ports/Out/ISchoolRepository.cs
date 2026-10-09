@@ -12,4 +12,5 @@ public interface ISchoolRepository
     Task UpdateWithCampusesAsync(Domain.Model.School school, IReadOnlyList<SchoolCampus> campuses);
     Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId);
     Task DeleteAsync(Guid id);
+    Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default);
 }

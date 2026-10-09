@@ -129,6 +129,15 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
         await _context.SaveChangesAsync();
     }
 
+    public async Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default)
+    {
+        return await _context.Set<CityRefEntity>()
+            .AsNoTracking()
+            .Where(c => c.Id == cityId)
+            .Select(c => c.Name)
+            .FirstOrDefaultAsync(ct);
+    }
+
     private static Domain.Model.School MapToDomain(SchoolEntity e) => new()
     {
         Id = e.Id,

@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
 
 namespace ms_school_management.Api.School.Infrastructure.Controller;
@@ -9,32 +10,29 @@ namespace ms_school_management.Api.School.Infrastructure.Controller;
 public sealed class SchoolController : ControllerBase
 {
     private readonly ICreateSchoolUseCase _createSchool;
+    private readonly ICreateSchoolWithCampusesUseCase _createSchoolWithCampuses;
     private readonly IGetSchoolUseCase _getSchool;
     private readonly IListSchoolsUseCase _listSchools;
     private readonly IUpdateSchoolUseCase _updateSchool;
     private readonly IDeleteSchoolUseCase _deleteSchool;
-    private readonly ICreateSchoolWithCampusesUseCase _createWithCampuses;
-    private readonly IUpdateSchoolWithCampusesUseCase _updateWithCampuses;
-    private readonly IListSchoolCampusesUseCase _listCampuses;
+    private readonly ISearchSchoolsUseCase _searchSchools;
 
     public SchoolController(
         ICreateSchoolUseCase createSchool,
+        ICreateSchoolWithCampusesUseCase createSchoolWithCampuses,
         IGetSchoolUseCase getSchool,
         IListSchoolsUseCase listSchools,
         IUpdateSchoolUseCase updateSchool,
         IDeleteSchoolUseCase deleteSchool,
-        ICreateSchoolWithCampusesUseCase createWithCampuses,
-        IUpdateSchoolWithCampusesUseCase updateWithCampuses,
-        IListSchoolCampusesUseCase listCampuses)
+        ISearchSchoolsUseCase searchSchools)
     {
         _createSchool = createSchool;
+        _createSchoolWithCampuses = createSchoolWithCampuses;
         _getSchool = getSchool;
         _listSchools = listSchools;
         _updateSchool = updateSchool;
         _deleteSchool = deleteSchool;
-        _createWithCampuses = createWithCampuses;
-        _updateWithCampuses = updateWithCampuses;
-        _listCampuses = listCampuses;
+        _searchSchools = searchSchools;
     }
 
     [HttpPost]
@@ -44,17 +42,50 @@ public sealed class SchoolController : ControllerBase
         return CreatedAtAction(nameof(Get), new { id }, null);
     }
 
+    /// <summary>
+    /// Alta de colegio con sus sedes. Es la ruta que consume el formulario de
+    /// registro de colegio del frontend, donde las sedes se capturan como una
+    /// lista dinamica de nombres.
+    ///
+    /// Devuelve 201 con el colegio y las sedes creadas (con sus ids) para que el
+    /// cliente pueda usarlos de inmediato, por ejemplo al registrar al primer
+    /// admin con su sede.
+    /// </summary>
     [HttpPost("with-campuses")]
-    public async Task<IActionResult> CreateWithCampuses([FromBody] SchoolWithCampusesRequestDto request)
+    public async Task<IActionResult> CreateWithCampuses([FromBody] CreateSchoolWithCampusesDto request)
     {
-        var result = await _createWithCampuses.ExecuteAsync(request);
-        return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
+        try
+        {
+            var result = await _createSchoolWithCampuses.ExecuteAsync(request);
+            return CreatedAtAction(nameof(Get), new { id = result.SchoolId }, result);
+        }
+        catch (CampusNamesRequiredException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid request",
+                detail: ex.Message);
+        }
+        catch (DuplicateCampusNameException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status409Conflict,
+                title: "Duplicate campus name",
+                detail: ex.Message);
+        }
     }
 
     [HttpGet]
     public async Task<IActionResult> List()
     {
         var schools = await _listSchools.ExecuteAsync();
+        return Ok(schools);
+    }
+
+    [HttpGet("search")]
+    public async Task<IActionResult> Search([FromQuery] string search)
+    {
+        var schools = await _searchSchools.ExecuteAsync(search);
         return Ok(schools);
     }
 
