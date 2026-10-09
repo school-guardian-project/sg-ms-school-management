@@ -13,7 +13,8 @@ public record SchoolWithCampusesRequestDto(
     string Email,
     string? Website,
     string? Theme,
-    [Required] IReadOnlyList<SchoolCampusRequestDto> Campuses);
+    [Required] IReadOnlyList<SchoolCampusRequestDto> Campuses,
+    string? Status = null);
 
 public record SchoolWithCampusesResponseDto(
     Guid Id,

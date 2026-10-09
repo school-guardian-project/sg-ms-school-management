@@ -6,12 +6,12 @@ using ms_school_management.Api.School.Domain.Ports.Out;
 
 namespace ms_school_management.Api.School.Application.UseCase;
 
-public sealed class CreateSchoolWithCampusesService : ICreateSchoolWithCampusesUseCase
+public sealed class CreateSchoolWithCampusDetailsService : ICreateSchoolWithCampusDetailsUseCase
 {
     private readonly ISchoolRepository _repository;
     private readonly IMapper _mapper;
 
-    public CreateSchoolWithCampusesService(ISchoolRepository repository, IMapper mapper)
+    public CreateSchoolWithCampusDetailsService(ISchoolRepository repository, IMapper mapper)
     {
         _repository = repository;
         _mapper = mapper;

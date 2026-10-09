@@ -12,7 +12,8 @@ public record SchoolRequestDto(
     long Phone,
     string Email,
     string? Website,
-    string? Theme);
+    string? Theme,
+    string? Status = null);
 
 /// <summary>
 /// Alta de colegio con sus sedes. Las sedes se crean en la misma transaccion que
@@ -29,7 +30,7 @@ public record CreateSchoolWithCampusesDto(
     Guid CityId,
     string Name,
     string Address,
-    int Phone,
+    long Phone,
     string Email,
     string? Website,
     string? Theme,
@@ -41,7 +42,7 @@ public record CreateSchoolWithCampusesResponseDto(
     Guid SchoolId,
     string Name,
     string Address,
-    int Phone,
+    long Phone,
     string Email,
     Guid CityId,
     string Status,

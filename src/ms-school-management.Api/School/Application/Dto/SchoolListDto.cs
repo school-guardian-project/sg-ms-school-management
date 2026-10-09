@@ -4,4 +4,5 @@ public record SchoolListDto(
     Guid Id,
     Guid CityId,
     string Name,
-    string Address);
+    string Address,
+    string Status);

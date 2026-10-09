@@ -26,6 +26,7 @@ public static class ServiceCollectionExtensions
         services.AddScoped<ITenantSchoolResolver, TenantSchoolResolver>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
         services.AddScoped<ICreateSchoolWithCampusesUseCase, CreateSchoolWithCampusesService>();
+        services.AddScoped<ICreateSchoolWithCampusDetailsUseCase, CreateSchoolWithCampusDetailsService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
         services.AddScoped<IUpdateSchoolUseCase, UpdateSchoolService>();

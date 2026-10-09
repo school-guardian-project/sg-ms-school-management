@@ -47,7 +47,7 @@ public class SchoolCentralCampusTests
         var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
             "Central street 123", 2.9m, -75.2m, 3001234567, "school@example.invalid", null, "Primaria",
             additional ? [new SchoolCampusRequestDto(null, "North", "North street 456", null, null)] : []);
-        var result = await new CreateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(request);
+        var result = await new CreateSchoolWithCampusDetailsService(repository, Mapper()).ExecuteAsync(request);
         Assert.Equal(additional ? 2 : 1, result.Campuses.Count);
         var central = repository.Campuses[0];
         Assert.Equal("Sede central", central.Name);
@@ -78,7 +78,7 @@ public class SchoolCentralCampusTests
         var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
             "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria",
             [new SchoolCampusRequestDto(null, " SEDE CENTRAL ", "Explicit central address", null, null)]);
-        var result = await new CreateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(request);
+        var result = await new CreateSchoolWithCampusDetailsService(repository, Mapper()).ExecuteAsync(request);
         var campus = Assert.Single(result.Campuses);
         Assert.Equal("SEDE CENTRAL", campus.Name);
         Assert.Equal("Explicit central address", campus.Address);
