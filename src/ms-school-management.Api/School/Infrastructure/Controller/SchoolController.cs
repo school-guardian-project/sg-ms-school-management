@@ -36,7 +36,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Create(SchoolRequestDto request)
+    public async Task<IActionResult> Create([FromBody] SchoolRequestDto request)
     {
         var id = await _createSchool.ExecuteAsync(request);
         return CreatedAtAction(nameof(Get), new { id }, null);
@@ -96,10 +96,24 @@ public sealed class SchoolController : ControllerBase
         return school is null ? NotFound() : Ok(school);
     }
 
+    [HttpGet("{id:guid}/campuses")]
+    public async Task<IActionResult> ListCampuses(Guid id)
+    {
+        var campuses = await _listCampuses.ExecuteAsync(id);
+        return Ok(campuses);
+    }
+
     [HttpPut("{id:guid}")]
-    public async Task<IActionResult> Update(Guid id, SchoolRequestDto request)
+    public async Task<IActionResult> Update(Guid id, [FromBody] SchoolRequestDto request)
     {
         await _updateSchool.ExecuteAsync(id, request);
+        return NoContent();
+    }
+
+    [HttpPut("{id:guid}/with-campuses")]
+    public async Task<IActionResult> UpdateWithCampuses(Guid id, [FromBody] SchoolWithCampusesRequestDto request)
+    {
+        await _updateWithCampuses.ExecuteAsync(id, request);
         return NoContent();
     }
 

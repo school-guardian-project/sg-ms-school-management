@@ -9,6 +9,7 @@ public class SchoolProfile : Profile
     public SchoolProfile()
     {
         CreateMap<SchoolRequestDto, Domain.Model.School>();
+        CreateMap<SchoolWithCampusesRequestDto, Domain.Model.School>();
         CreateMap<Domain.Model.School, SchoolListDto>();
         CreateMap<Domain.Model.School, SchoolResponseDto>();
     }

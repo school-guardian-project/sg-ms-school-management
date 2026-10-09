@@ -19,11 +19,12 @@ public sealed class CreateSchoolService : ICreateSchoolUseCase
 
     public async Task<Guid> ExecuteAsync(SchoolRequestDto request)
     {
+        SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         var school = _mapper.Map<Domain.Model.School>(request);
         school.Id = Guid.NewGuid();
         school.Status = Status.Active;
 
-        await _repository.SaveAsync(school);
+        await _repository.SaveWithCampusesAsync(school, [SchoolCampus.Central(school)]);
         return school.Id;
     }
 }
