@@ -44,7 +44,6 @@ public static class ServiceCollectionExtensions
         services.AddScoped<IGetAdminSchoolUseCase, GetAdminSchoolService>();
         services.AddScoped<IGetCampusUseCase, GetCampusService>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
-        services.AddScoped<ICreateSchoolWithCampusesUseCase, CreateSchoolWithCampusesService>();
 
         return services;
     }

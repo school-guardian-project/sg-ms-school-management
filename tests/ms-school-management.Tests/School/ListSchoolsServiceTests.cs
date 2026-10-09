@@ -183,6 +183,13 @@ public class ListSchoolsServiceTests
 
         public Task UpdateAsync(SchoolModel school) => Task.CompletedTask;
 
+        public Task SaveWithCampusesAsync(SchoolModel school, IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus> campuses) =>
+            throw new NotSupportedException();
+        public Task UpdateWithCampusesAsync(SchoolModel school, IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus> campuses) =>
+            throw new NotSupportedException();
+        public Task<IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId) =>
+            throw new NotSupportedException();
+
         public Task DeleteAsync(Guid id) => Task.CompletedTask;
 
         public Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default) =>

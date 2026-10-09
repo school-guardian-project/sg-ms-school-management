@@ -16,6 +16,8 @@ public sealed class SchoolController : ControllerBase
     private readonly IUpdateSchoolUseCase _updateSchool;
     private readonly IDeleteSchoolUseCase _deleteSchool;
     private readonly ISearchSchoolsUseCase _searchSchools;
+    private readonly IListSchoolCampusesUseCase _listCampuses;
+    private readonly IUpdateSchoolWithCampusesUseCase _updateWithCampuses;
 
     public SchoolController(
         ICreateSchoolUseCase createSchool,
@@ -24,7 +26,9 @@ public sealed class SchoolController : ControllerBase
         IListSchoolsUseCase listSchools,
         IUpdateSchoolUseCase updateSchool,
         IDeleteSchoolUseCase deleteSchool,
-        ISearchSchoolsUseCase searchSchools)
+        ISearchSchoolsUseCase searchSchools,
+        IListSchoolCampusesUseCase listCampuses,
+        IUpdateSchoolWithCampusesUseCase updateWithCampuses)
     {
         _createSchool = createSchool;
         _createSchoolWithCampuses = createSchoolWithCampuses;
@@ -33,6 +37,8 @@ public sealed class SchoolController : ControllerBase
         _updateSchool = updateSchool;
         _deleteSchool = deleteSchool;
         _searchSchools = searchSchools;
+        _listCampuses = listCampuses;
+        _updateWithCampuses = updateWithCampuses;
     }
 
     [HttpPost]
@@ -45,32 +51,25 @@ public sealed class SchoolController : ControllerBase
     /// <summary>
     /// Alta de colegio con sus sedes. Es la ruta que consume el formulario de
     /// registro de colegio del frontend, donde las sedes se capturan como una
-    /// lista dinamica de nombres.
+    /// lista dinamica de sedes adicionales opcionales.
     ///
     /// Devuelve 201 con el colegio y las sedes creadas (con sus ids) para que el
     /// cliente pueda usarlos de inmediato, por ejemplo al registrar al primer
     /// admin con su sede.
     /// </summary>
     [HttpPost("with-campuses")]
-    public async Task<IActionResult> CreateWithCampuses([FromBody] CreateSchoolWithCampusesDto request)
+    public async Task<IActionResult> CreateWithCampuses([FromBody] SchoolWithCampusesRequestDto request)
     {
         try
         {
             var result = await _createSchoolWithCampuses.ExecuteAsync(request);
-            return CreatedAtAction(nameof(Get), new { id = result.SchoolId }, result);
+            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
         }
-        catch (CampusNamesRequiredException ex)
+        catch (ArgumentException ex)
         {
             return Problem(
                 statusCode: StatusCodes.Status400BadRequest,
                 title: "Invalid request",
-                detail: ex.Message);
-        }
-        catch (DuplicateCampusNameException ex)
-        {
-            return Problem(
-                statusCode: StatusCodes.Status409Conflict,
-                title: "Duplicate campus name",
                 detail: ex.Message);
         }
     }
