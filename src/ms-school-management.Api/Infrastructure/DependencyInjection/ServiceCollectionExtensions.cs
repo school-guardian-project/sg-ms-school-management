@@ -18,9 +18,12 @@ public static class ServiceCollectionExtensions
 
         services.AddScoped<ISchoolRepository, SchoolRepositoryImpl>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
+        services.AddScoped<ICreateSchoolWithCampusesUseCase, CreateSchoolWithCampusesService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
         services.AddScoped<IUpdateSchoolUseCase, UpdateSchoolService>();
+        services.AddScoped<IUpdateSchoolWithCampusesUseCase, UpdateSchoolWithCampusesService>();
+        services.AddScoped<IListSchoolCampusesUseCase, ListSchoolCampusesService>();
         services.AddScoped<IDeleteSchoolUseCase, DeleteSchoolService>();
 
         return services;

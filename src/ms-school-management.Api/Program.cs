@@ -4,7 +4,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
-builder.Services.AddAutoMapper(typeof(Program).Assembly);
+builder.Services.AddAutoMapper(_ => { }, typeof(Program).Assembly);
 builder.Services.AddSchoolManagementServices(builder.Configuration);
 
 var app = builder.Build();

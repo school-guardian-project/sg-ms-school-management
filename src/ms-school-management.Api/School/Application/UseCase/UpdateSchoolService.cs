@@ -18,6 +18,7 @@ public sealed class UpdateSchoolService : IUpdateSchoolUseCase
 
     public async Task ExecuteAsync(Guid id, SchoolRequestDto request)
     {
+        SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         var school = await _repository.FindByIdAsync(id)
             ?? throw new KeyNotFoundException($"School {id} not found");
 
