@@ -14,6 +14,8 @@ public sealed class SchoolController : ControllerBase
     private readonly IGetSchoolUseCase _getSchool;
     private readonly IListSchoolsUseCase _listSchools;
     private readonly IUpdateSchoolUseCase _updateSchool;
+    private readonly IUpdateSchoolWithCampusesUseCase _updateWithCampuses;
+    private readonly IListSchoolCampusesUseCase _listCampuses;
     private readonly IDeleteSchoolUseCase _deleteSchool;
     private readonly ISearchSchoolsUseCase _searchSchools;
 
@@ -23,6 +25,8 @@ public sealed class SchoolController : ControllerBase
         IGetSchoolUseCase getSchool,
         IListSchoolsUseCase listSchools,
         IUpdateSchoolUseCase updateSchool,
+        IUpdateSchoolWithCampusesUseCase updateWithCampuses,
+        IListSchoolCampusesUseCase listCampuses,
         IDeleteSchoolUseCase deleteSchool,
         ISearchSchoolsUseCase searchSchools)
     {
@@ -31,6 +35,8 @@ public sealed class SchoolController : ControllerBase
         _getSchool = getSchool;
         _listSchools = listSchools;
         _updateSchool = updateSchool;
+        _updateWithCampuses = updateWithCampuses;
+        _listCampuses = listCampuses;
         _deleteSchool = deleteSchool;
         _searchSchools = searchSchools;
     }
