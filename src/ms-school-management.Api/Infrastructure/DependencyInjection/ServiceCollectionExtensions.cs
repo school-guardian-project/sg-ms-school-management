@@ -16,8 +16,11 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSchoolManagementServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<SchoolManagementContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContextPool<SchoolManagementContext>(
+            (sp, options) => options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)),
+            poolSize: 64);
 
         services.AddScoped<ISchoolRepository, SchoolRepositoryImpl>();
         services.AddHttpContextAccessor();

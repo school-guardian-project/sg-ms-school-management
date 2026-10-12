@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
@@ -41,6 +42,7 @@ public sealed class SchoolController : ControllerBase
         _updateWithCampuses = updateWithCampuses;
     }
 
+    [EnableRateLimiting("writes")]
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] SchoolRequestDto request)
     {
@@ -57,6 +59,7 @@ public sealed class SchoolController : ControllerBase
     /// cliente pueda usarlos de inmediato, por ejemplo al registrar al primer
     /// admin con su sede.
     /// </summary>
+    [EnableRateLimiting("writes")]
     [HttpPost("with-campuses")]
     public async Task<IActionResult> CreateWithCampuses([FromBody] SchoolWithCampusesRequestDto request)
     {
@@ -102,6 +105,7 @@ public sealed class SchoolController : ControllerBase
         return Ok(campuses);
     }
 
+    [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update(Guid id, [FromBody] SchoolRequestDto request)
     {
@@ -109,6 +113,7 @@ public sealed class SchoolController : ControllerBase
         return NoContent();
     }
 
+    [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}/with-campuses")]
     public async Task<IActionResult> UpdateWithCampuses(Guid id, [FromBody] SchoolWithCampusesRequestDto request)
     {
@@ -116,6 +121,7 @@ public sealed class SchoolController : ControllerBase
         return NoContent();
     }
 
+    [EnableRateLimiting("writes")]
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete(Guid id)
     {
