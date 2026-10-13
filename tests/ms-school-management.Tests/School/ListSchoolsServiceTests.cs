@@ -10,6 +10,7 @@ using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
 namespace ms_school_management.Tests.School;
 
+[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class ListSchoolsServiceTests
 {
     private static readonly Guid SabanaId = Guid.Parse("a2000001-0000-4000-8000-000000000001");
@@ -55,17 +56,17 @@ public class ListSchoolsServiceTests
         return new ListSchoolsService(new FakeSchoolRepository(schools), resolver, CreateMapper());
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_SinToken_RetornaTodosLosColegios()
     {
         var service = CreateService(new FakeTenantProvider(shouldFilter: false));
 
         var result = await service.ExecuteAsync();
 
-        Assert.Equal(2, result.Count);
+        Assert.That(result.Count, Is.EqualTo(2));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_Admin_ResuelvePorSchoolAdminConPrioridad()
     {
         // El registro SchoolAdmin (Sabana) debe ganar sobre el claim (Oriente).
@@ -74,11 +75,13 @@ public class ListSchoolsServiceTests
 
         var result = await service.ExecuteAsync();
 
-        var school = Assert.Single(result);
-        Assert.Equal("Institucion Educativa Sabana", school.Name);
+        var schoolItems = result;
+        Assert.That(schoolItems, Has.Exactly(1).Items);
+        var school = schoolItems.Single();
+        Assert.That(school.Name, Is.EqualTo("Institucion Educativa Sabana"));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_AdminSinRegistro_UsaClaimSchoolId()
     {
         var service = CreateService(new FakeTenantProvider(
@@ -86,11 +89,13 @@ public class ListSchoolsServiceTests
 
         var result = await service.ExecuteAsync();
 
-        var school = Assert.Single(result);
-        Assert.Equal("Colegio Tecnico Del Oriente", school.Name);
+        var schoolItems = result;
+        Assert.That(schoolItems, Has.Exactly(1).Items);
+        var school = schoolItems.Single();
+        Assert.That(school.Name, Is.EqualTo("Colegio Tecnico Del Oriente"));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_StudentConCampus_RetornaColegioDuenoDeSuSede()
     {
         var service = CreateService(new FakeTenantProvider(
@@ -98,18 +103,20 @@ public class ListSchoolsServiceTests
 
         var result = await service.ExecuteAsync();
 
-        var school = Assert.Single(result);
-        Assert.Equal(SabanaId, school.Id);
+        var schoolItems = result;
+        Assert.That(schoolItems, Has.Exactly(1).Items);
+        var school = schoolItems.Single();
+        Assert.That(school.Id, Is.EqualTo(SabanaId));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_StudentSinCampus_NoFiltra()
     {
         var service = CreateService(new FakeTenantProvider(shouldFilter: true, roleId: 2));
 
         var result = await service.ExecuteAsync();
 
-        Assert.Equal(2, result.Count);
+        Assert.That(result.Count, Is.EqualTo(2));
     }
 
     private sealed class FakeTenantProvider : ITenantProvider
