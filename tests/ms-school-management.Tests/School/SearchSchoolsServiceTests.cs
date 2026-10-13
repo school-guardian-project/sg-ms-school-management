@@ -10,6 +10,7 @@ using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
 namespace ms_school_management.Tests.School;
 
+[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class SearchSchoolsServiceTests
 {
     private static IMapper CreateMapper()
@@ -45,15 +46,15 @@ public class SearchSchoolsServiceTests
         });
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_TerminoVacio_RetornaListaVacia()
     {
         var service = CreateService(NewSchool("San Martin", "Calle 1"));
 
-        Assert.Empty(await service.ExecuteAsync("   "));
+        Assert.That(await service.ExecuteAsync("   "), Is.Empty);
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_Nombre_RetornaSoloCoincidencias()
     {
         var service = CreateService(
@@ -62,11 +63,13 @@ public class SearchSchoolsServiceTests
 
         var result = (await service.ExecuteAsync("martin")).ToList();
 
-        var school = Assert.Single(result);
-        Assert.Equal("San Martin", school.Name);
+        var schoolItems = result;
+        Assert.That(schoolItems, Has.Exactly(1).Items);
+        var school = schoolItems.Single();
+        Assert.That(school.Name, Is.EqualTo("San Martin"));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_Direccion_RetornaSoloCoincidencias()
     {
         var service = CreateService(
@@ -75,16 +78,18 @@ public class SearchSchoolsServiceTests
 
         var result = (await service.ExecuteAsync("calle 10")).ToList();
 
-        var school = Assert.Single(result);
-        Assert.Equal("Calle 10", school.Address);
+        var schoolItems = result;
+        Assert.That(schoolItems, Has.Exactly(1).Items);
+        var school = schoolItems.Single();
+        Assert.That(school.Address, Is.EqualTo("Calle 10"));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_SinCoincidencias_RetornaVacio()
     {
         var service = CreateService(NewSchool("San Martin", "Calle 1"));
 
-        Assert.Empty(await service.ExecuteAsync("inexistente"));
+        Assert.That(await service.ExecuteAsync("inexistente"), Is.Empty);
     }
 
     private sealed class NoFilterTenantSchoolResolver : ITenantSchoolResolver

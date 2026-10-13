@@ -5,11 +5,12 @@ using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Infrastructure.Controller.Mapper;
-using Xunit;
+using NUnit.Framework;
 using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
 namespace ms_school_management.Tests;
 
+[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class SchoolCentralCampusTests
 {
     private sealed class Repository : ISchoolRepository
@@ -38,9 +39,8 @@ public class SchoolCentralCampusTests
         return new MapperConfiguration(cfg => cfg.AddProfile<SchoolProfile>(), NullLoggerFactory.Instance).CreateMapper();
     }
 
-    [Theory]
-    [InlineData(false)]
-    [InlineData(true)]
+    [TestCase(false)]
+    [TestCase(true)]
     public async Task WithCampusesPersistsCentralAndOptionalAdditionalCampus(bool additional)
     {
         var repository = new Repository();
@@ -48,30 +48,32 @@ public class SchoolCentralCampusTests
             "Central street 123", 2.9m, -75.2m, 3001234567, "school@example.invalid", null, "Primaria",
             additional ? [new SchoolCampusRequestDto(null, "North", "North street 456", null, null)] : []);
         var result = await new CreateSchoolWithCampusDetailsService(repository, Mapper()).ExecuteAsync(request);
-        Assert.Equal(additional ? 2 : 1, result.Campuses.Count);
+        Assert.That(result.Campuses.Count, Is.EqualTo(additional ? 2 : 1));
         var central = repository.Campuses[0];
-        Assert.Equal("Sede central", central.Name);
-        Assert.Equal(result.Id, central.SchoolId);
-        Assert.Equal(request.Address, central.Address);
-        Assert.Equal(request.Latitude, central.Latitude);
-        Assert.Equal(request.Longitude, central.Longitude);
-        Assert.Equal(Status.Active, central.Status);
-        Assert.Equal(result.Campuses[0].Id, central.Id);
+        Assert.That(central.Name, Is.EqualTo("Sede central"));
+        Assert.That(central.SchoolId, Is.EqualTo(result.Id));
+        Assert.That(central.Address, Is.EqualTo(request.Address));
+        Assert.That(central.Latitude, Is.EqualTo(request.Latitude));
+        Assert.That(central.Longitude, Is.EqualTo(request.Longitude));
+        Assert.That(central.Status, Is.EqualTo(Status.Active));
+        Assert.That(central.Id, Is.EqualTo(result.Campuses[0].Id));
     }
 
-    [Fact]
+    [Test]
     public async Task PlainCreationAlsoPersistsCentralInSameOperation()
     {
         var repository = new Repository();
         var request = new SchoolRequestDto(Guid.NewGuid(), [], "Test school", "Central street 123",
             null, null, 3001234567, "school@example.invalid", null, "Primaria");
         var id = await new CreateSchoolService(repository, Mapper()).ExecuteAsync(request);
-        var campus = Assert.Single(repository.Campuses);
-        Assert.Equal(id, campus.SchoolId);
-        Assert.Equal(request.Address, campus.Address);
+        var campusItems = repository.Campuses;
+        Assert.That(campusItems, Has.Exactly(1).Items);
+        var campus = campusItems.Single();
+        Assert.That(campus.SchoolId, Is.EqualTo(id));
+        Assert.That(campus.Address, Is.EqualTo(request.Address));
     }
 
-    [Fact]
+    [Test]
     public async Task ExistingClientsCanSupplyCentralWithoutCreatingDuplicate()
     {
         var repository = new Repository();
@@ -79,8 +81,10 @@ public class SchoolCentralCampusTests
             "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria",
             [new SchoolCampusRequestDto(null, " SEDE CENTRAL ", "Explicit central address", null, null)]);
         var result = await new CreateSchoolWithCampusDetailsService(repository, Mapper()).ExecuteAsync(request);
-        var campus = Assert.Single(result.Campuses);
-        Assert.Equal("SEDE CENTRAL", campus.Name);
-        Assert.Equal("Explicit central address", campus.Address);
+        var campusItems = result.Campuses;
+        Assert.That(campusItems, Has.Exactly(1).Items);
+        var campus = campusItems.Single();
+        Assert.That(campus.Name, Is.EqualTo("SEDE CENTRAL"));
+        Assert.That(campus.Address, Is.EqualTo("Explicit central address"));
     }
 }
