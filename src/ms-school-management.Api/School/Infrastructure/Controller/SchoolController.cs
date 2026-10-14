@@ -11,7 +11,7 @@ namespace ms_school_management.Api.School.Infrastructure.Controller;
 public sealed class SchoolController : ControllerBase
 {
     private readonly ICreateSchoolUseCase _createSchool;
-    private readonly ICreateSchoolWithCampusesUseCase _createSchoolWithCampuses;
+    private readonly ICreateSchoolWithCampusDetailsUseCase _createSchoolWithCampuses;
     private readonly IGetSchoolUseCase _getSchool;
     private readonly IListSchoolsUseCase _listSchools;
     private readonly IUpdateSchoolUseCase _updateSchool;
@@ -19,21 +19,17 @@ public sealed class SchoolController : ControllerBase
     private readonly IListSchoolCampusesUseCase _listCampuses;
     private readonly IDeleteSchoolUseCase _deleteSchool;
     private readonly ISearchSchoolsUseCase _searchSchools;
-    private readonly IListSchoolCampusesUseCase _listCampuses;
-    private readonly IUpdateSchoolWithCampusesUseCase _updateWithCampuses;
 
     public SchoolController(
         ICreateSchoolUseCase createSchool,
-        ICreateSchoolWithCampusesUseCase createSchoolWithCampuses,
+        ICreateSchoolWithCampusDetailsUseCase createSchoolWithCampuses,
         IGetSchoolUseCase getSchool,
         IListSchoolsUseCase listSchools,
         IUpdateSchoolUseCase updateSchool,
         IUpdateSchoolWithCampusesUseCase updateWithCampuses,
         IListSchoolCampusesUseCase listCampuses,
         IDeleteSchoolUseCase deleteSchool,
-        ISearchSchoolsUseCase searchSchools,
-        IListSchoolCampusesUseCase listCampuses,
-        IUpdateSchoolWithCampusesUseCase updateWithCampuses)
+        ISearchSchoolsUseCase searchSchools)
     {
         _createSchool = createSchool;
         _createSchoolWithCampuses = createSchoolWithCampuses;
@@ -44,8 +40,6 @@ public sealed class SchoolController : ControllerBase
         _listCampuses = listCampuses;
         _deleteSchool = deleteSchool;
         _searchSchools = searchSchools;
-        _listCampuses = listCampuses;
-        _updateWithCampuses = updateWithCampuses;
     }
 
     [EnableRateLimiting("writes")]
