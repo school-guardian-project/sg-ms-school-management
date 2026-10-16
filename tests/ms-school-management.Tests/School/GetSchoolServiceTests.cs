@@ -8,6 +8,7 @@ using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
 namespace ms_school_management.Tests.School;
 
+[FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
 public class GetSchoolServiceTests
 {
     private static IMapper CreateMapper()
@@ -31,7 +32,7 @@ public class GetSchoolServiceTests
         Status = Status.Active
     };
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_ConCiudad_RellenaCityName()
     {
         var schoolId = Guid.NewGuid();
@@ -44,12 +45,12 @@ public class GetSchoolServiceTests
 
         var result = await service.ExecuteAsync(schoolId);
 
-        Assert.NotNull(result);
-        Assert.Equal("Bogota", result.CityName);
-        Assert.Equal(cityId, result.CityId);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.CityName, Is.EqualTo("Bogota"));
+        Assert.That(result.CityId, Is.EqualTo(cityId));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_CiudadSinRegistro_CityNameVacio()
     {
         var schoolId = Guid.NewGuid();
@@ -58,16 +59,16 @@ public class GetSchoolServiceTests
 
         var result = await service.ExecuteAsync(schoolId);
 
-        Assert.NotNull(result);
-        Assert.Equal(string.Empty, result.CityName);
+        Assert.That(result, Is.Not.Null);
+        Assert.That(result.CityName, Is.EqualTo(string.Empty));
     }
 
-    [Fact]
+    [Test]
     public async Task ExecuteAsync_SinEscuela_RetornaNull()
     {
         var service = new GetSchoolService(new FakeSchoolRepository(), CreateMapper());
 
-        Assert.Null(await service.ExecuteAsync(Guid.NewGuid()));
+        Assert.That(await service.ExecuteAsync(Guid.NewGuid()), Is.Null);
     }
 
     private sealed class FakeSchoolRepository : ISchoolRepository
@@ -91,6 +92,13 @@ public class GetSchoolServiceTests
             Task.FromResult<IReadOnlyList<SchoolModel>>(_schools);
 
         public Task UpdateAsync(SchoolModel school) => Task.CompletedTask;
+
+        public Task SaveWithCampusesAsync(SchoolModel school, IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus> campuses) =>
+            throw new NotSupportedException();
+        public Task UpdateWithCampusesAsync(SchoolModel school, IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus> campuses) =>
+            throw new NotSupportedException();
+        public Task<IReadOnlyList<ms_school_management.Api.School.Domain.Model.SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId) =>
+            throw new NotSupportedException();
 
         public Task DeleteAsync(Guid id) => Task.CompletedTask;
 

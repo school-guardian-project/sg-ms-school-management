@@ -1,9 +1,9 @@
 namespace ms_school_management.Api.School.Infrastructure.Persistence.Entity;
 
-public class CourseEntity
+public class SchoolAdminEntity
 {
     public Guid Id { get; set; }
-    public Guid CampusId { get; set; }
-    public string Name { get; set; }
+    public Guid SchoolId { get; set; }
+    public Guid ProfileId { get; set; }
     public string Status { get; set; }
 }

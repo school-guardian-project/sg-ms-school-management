@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using ms_school_management.Api.Infrastructure.Tenancy;
 using ms_school_management.Api.School.Application.Search;
 using ms_school_management.Api.School.Application.Search.Strategy;
 using ms_school_management.Api.School.Application.UseCase;
@@ -15,18 +16,37 @@ public static class ServiceCollectionExtensions
 {
     public static IServiceCollection AddSchoolManagementServices(this IServiceCollection services, IConfiguration configuration)
     {
-        services.AddDbContext<SchoolManagementContext>(options =>
-            options.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
+        services.AddDbContextPool<SchoolManagementContext>(
+            (sp, options) => options.UseSqlServer(
+                configuration.GetConnectionString("DefaultConnection"),
+                sql => sql.EnableRetryOnFailure(3, TimeSpan.FromSeconds(5), null)),
+            poolSize: 64);
 
         services.AddScoped<ISchoolRepository, SchoolRepositoryImpl>();
+        services.AddHttpContextAccessor();
+        services.AddMemoryCache();
+        services.AddScoped<ITenantProvider, TenantProvider>();
+        services.AddScoped<ITenantSchoolResolver, TenantSchoolResolver>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
+        services.AddScoped<ICreateSchoolWithCampusDetailsUseCase, CreateSchoolWithCampusDetailsService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();
         services.AddScoped<IListSchoolsUseCase, ListSchoolsService>();
         services.AddScoped<IUpdateSchoolUseCase, UpdateSchoolService>();
+        services.AddScoped<IUpdateSchoolWithCampusesUseCase, UpdateSchoolWithCampusesService>();
+        services.AddScoped<IListSchoolCampusesUseCase, ListSchoolCampusesService>();
         services.AddScoped<IDeleteSchoolUseCase, DeleteSchoolService>();
 
         services.AddScoped<ISchoolSearchStrategy, NameSearchStrategy>();
         services.AddScoped<ISearchSchoolsUseCase, SearchSchoolsService>();
+
+        services.AddScoped<ICampusRepository, CampusRepositoryImpl>();
+        services.AddScoped<IListCampusesBySchoolUseCase, ListCampusesBySchoolService>();
+
+        services.AddScoped<ISchoolAdminRepository, SchoolAdminRepositoryImpl>();
+        services.AddScoped<ILinkAdminSchoolUseCase, LinkAdminSchoolService>();
+        services.AddScoped<IGetAdminSchoolUseCase, GetAdminSchoolService>();
+        services.AddScoped<IGetCampusUseCase, GetCampusService>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
 
         return services;
     }
