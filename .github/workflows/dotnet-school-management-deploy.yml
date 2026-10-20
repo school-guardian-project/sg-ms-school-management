@@ -8,7 +8,7 @@ on:
 
 jobs:
   call-dotnet-workflow:
-    uses: school-guardian-project/.github/.github/workflows/dotnet-deploy.yml@main
+    uses: school-guardian-project/.github/.github/workflows/deploy-dotnet.yml@main
     with:
       dockerfile_path: 'src/ms-school-management.Api/Dockerfile'
       app_name: 'school-management-app'
