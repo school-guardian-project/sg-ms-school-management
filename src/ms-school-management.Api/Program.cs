@@ -1,6 +1,5 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
-using Microsoft.AspNetCore.Server.Kestrel.Core;
 using ms_school_management.Api.Infrastructure.DependencyInjection;
 using ms_school_management.Api.Infrastructure.Grpc;
 using ms_school_management.Api.Infrastructure.Tenancy;
@@ -8,11 +7,14 @@ using ms_school_management.Api.School.Infrastructure.Controller.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.WebHost.ConfigureKestrel(options =>
-{
-    options.ListenAnyIP(8080, endpoint => endpoint.Protocols = HttpProtocols.Http1);
-    options.ListenAnyIP(5001, endpoint => endpoint.Protocols = HttpProtocols.Http2);
-});
+// Kestrel endpoints are declared through configuration, not in code:
+//   ASPNETCORE_Kestrel__Endpoints__Http__Url  -> 8080,  HTTP/1.1, public REST API
+//   ASPNETCORE_Kestrel__Endpoints__Grpc__Url  -> 5001,  HTTP/2 (h2c), internal gRPC
+// Both are injected from the deployment env file, exactly like every other .NET
+// service in this project. Declaring them here as well duplicated each endpoint,
+// so Kestrel aborted startup with "Address already in use" and the container
+// crash-looped; Kong could not resolve its DNS and returned 503 for the whole
+// /school-management route, breaking school/campus listings in the web app.
 
 builder.Services.AddOpenApi();
 builder.Services.AddControllers();
