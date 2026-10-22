@@ -1,0 +1,20 @@
+name: Deploy School Management
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  call-dotnet-workflow:
+    uses: school-guardian-project/.github/.github/workflows/deploy-dotnet.yml@main
+    with:
+      dockerfile_path: 'src/ms-school-management.Api/Dockerfile'
+      app_name: 'ms-school-management'
+      host_port: 8080
+    secrets: inherit

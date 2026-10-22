@@ -23,11 +23,19 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
 
     public async Task SaveWithCampusesAsync(Domain.Model.School school, IReadOnlyList<SchoolCampus> campuses)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-        await _context.Schools.AddAsync(ToEntity(school));
-        await _context.Campuses.AddRangeAsync(campuses.Select(ToEntity));
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
+        // El DbContext se registra con EnableRetryOnFailure, asi que la
+        // transaccion debe vivir dentro de la execution strategy: si no,
+        // EF rechaza BeginTransactionAsync con InvalidOperationException y el
+        // alta de colegio con sedes termina en 500 sin crear nada.
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
+        {
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            await _context.Schools.AddAsync(ToEntity(school));
+            await _context.Campuses.AddRangeAsync(campuses.Select(ToEntity));
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
     }
 
     public async Task<Domain.Model.School?> FindByIdAsync(Guid id)
@@ -64,51 +72,65 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
 
     public async Task UpdateWithCampusesAsync(Domain.Model.School school, IReadOnlyList<SchoolCampus> campuses)
     {
-        await using var transaction = await _context.Database.BeginTransactionAsync();
-        var entity = await _context.Schools.FindAsync(school.Id)
-            ?? throw new KeyNotFoundException($"School {school.Id} not found");
-
-        entity.CityId = school.CityId;
-        entity.Logo = school.Logo;
-        entity.Name = school.Name;
-        entity.Address = school.Address;
-        entity.Latitude = school.Latitude;
-        entity.Longitude = school.Longitude;
-        entity.Phone = school.Phone;
-        entity.Email = school.Email;
-        entity.Website = school.Website;
-        entity.Theme = school.Theme;
-        entity.Status = school.Status.ToString();
-
-        foreach (var campus in campuses)
+        // Igual que en SaveWithCampusesAsync: con EnableRetryOnFailure activo la
+        // transaccion tiene que estar dentro de la execution strategy, o la
+        // edicion del colegio con sus sedes revienta con InvalidOperationException
+        // y no se guarda nada.
+        var strategy = _context.Database.CreateExecutionStrategy();
+        await strategy.ExecuteAsync(async () =>
         {
-            SchoolCampusEntity campusEntity;
-            if (campus.Id == Guid.Empty)
+            await using var transaction = await _context.Database.BeginTransactionAsync();
+            var entity = await _context.Schools.FindAsync(school.Id)
+                ?? throw new KeyNotFoundException($"School {school.Id} not found");
+
+            entity.CityId = school.CityId;
+            entity.Logo = school.Logo;
+            entity.Name = school.Name;
+            entity.Address = school.Address;
+            entity.Latitude = school.Latitude;
+            entity.Longitude = school.Longitude;
+            entity.Phone = school.Phone;
+            entity.Email = school.Email;
+            entity.Website = school.Website;
+            entity.Theme = school.Theme;
+            entity.Status = school.Status.ToString();
+
+            foreach (var campus in campuses)
             {
-                campusEntity = new SchoolCampusEntity
+                SchoolCampusEntity campusEntity;
+                if (campus.Id == Guid.Empty)
                 {
-                    Id = Guid.NewGuid(),
-                    SchoolId = school.Id,
-                    Status = campus.Status.ToString(),
-                };
-                await _context.Campuses.AddAsync(campusEntity);
-            }
-            else
-            {
-                campusEntity = await _context.Campuses
-                    .SingleOrDefaultAsync(x => x.Id == campus.Id && x.SchoolId == school.Id)
-                    ?? throw new KeyNotFoundException($"Campus {campus.Id} does not belong to school {school.Id}");
+                    campusEntity = new SchoolCampusEntity
+                    {
+                        Id = Guid.NewGuid(),
+                        SchoolId = school.Id,
+                        Status = campus.Status.ToString(),
+                    };
+                    await _context.Campuses.AddAsync(campusEntity);
+                }
+                else
+                {
+                    campusEntity = await _context.Campuses
+                        .SingleOrDefaultAsync(x => x.Id == campus.Id && x.SchoolId == school.Id)
+                        ?? throw new KeyNotFoundException($"Campus {campus.Id} does not belong to school {school.Id}");
+                }
+
+                if (campus.Status == Status.Inactive)
+                {
+                    campusEntity.Status = Status.Inactive.ToString();
+                    continue;
+                }
+
+                campusEntity.Name = campus.Name;
+                campusEntity.Address = campus.Address;
+                campusEntity.Latitude = campus.Latitude;
+                campusEntity.Longitude = campus.Longitude;
+                campusEntity.Status = campus.Status.ToString();
             }
 
-            campusEntity.Name = campus.Name;
-            campusEntity.Address = campus.Address;
-            campusEntity.Latitude = campus.Latitude;
-            campusEntity.Longitude = campus.Longitude;
-            campusEntity.Status = campus.Status.ToString();
-        }
-
-        await _context.SaveChangesAsync();
-        await transaction.CommitAsync();
+            await _context.SaveChangesAsync();
+            await transaction.CommitAsync();
+        });
     }
 
     public async Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId)
