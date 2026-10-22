@@ -14,7 +14,8 @@ public record SchoolWithCampusesRequestDto(
     string? Website,
     string? Theme,
     [Required] IReadOnlyList<SchoolCampusRequestDto> Campuses,
-    string? Status = null);
+    string? Status = null,
+    IReadOnlyList<Guid>? RemovedCampusIds = null);
 
 public record SchoolWithCampusesResponseDto(
     Guid Id,

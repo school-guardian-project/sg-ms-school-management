@@ -17,6 +17,7 @@ public class SchoolCentralCampusTests
     {
         public SchoolModel? School { get; private set; }
         public IReadOnlyList<SchoolCampus> Campuses { get; private set; } = [];
+        public bool Updated { get; private set; }
         public Task SaveWithCampusesAsync(SchoolModel school, IReadOnlyList<SchoolCampus> campuses)
         {
             School = school;
@@ -24,10 +25,16 @@ public class SchoolCentralCampusTests
             return Task.CompletedTask;
         }
         public Task SaveAsync(SchoolModel school) => throw new NotSupportedException();
-        public Task<SchoolModel?> FindByIdAsync(Guid id) => throw new NotSupportedException();
+        public Task<SchoolModel?> FindByIdAsync(Guid id) => Task.FromResult(School);
         public Task<IReadOnlyList<SchoolModel>> FindAllAsync() => throw new NotSupportedException();
         public Task UpdateAsync(SchoolModel school) => throw new NotSupportedException();
-        public Task UpdateWithCampusesAsync(SchoolModel school, IReadOnlyList<SchoolCampus> campuses) => throw new NotSupportedException();
+        public Task UpdateWithCampusesAsync(SchoolModel school, IReadOnlyList<SchoolCampus> campuses)
+        {
+            Updated = true;
+            School = school;
+            Campuses = campuses;
+            return Task.CompletedTask;
+        }
         public Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId) => throw new NotSupportedException();
         public Task DeleteAsync(Guid id) => throw new NotSupportedException();
         public Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default) =>
@@ -37,6 +44,57 @@ public class SchoolCentralCampusTests
     private static IMapper Mapper()
     {
         return new MapperConfiguration(cfg => cfg.AddProfile<SchoolProfile>(), NullLoggerFactory.Instance).CreateMapper();
+    }
+
+    [Test]
+    public async Task UpdateDeactivatesOnlyExplicitlyRemovedCampuses()
+    {
+        var repository = new Repository();
+        var schoolId = Guid.NewGuid();
+        var retainedId = Guid.NewGuid();
+        var removedId = Guid.NewGuid();
+        await repository.SaveWithCampusesAsync(new SchoolModel { Id = schoolId }, []);
+        var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
+            "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria",
+            [new SchoolCampusRequestDto(retainedId, "North", "North street 456", null, null)],
+            RemovedCampusIds: [removedId, removedId]);
+
+        await new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(schoolId, request);
+
+        Assert.That(repository.Campuses.Count, Is.EqualTo(2));
+        Assert.That(repository.Campuses.Single(c => c.Id == retainedId).Status, Is.EqualTo(Status.Active));
+        Assert.That(repository.Campuses.Single(c => c.Id == removedId).Status, Is.EqualTo(Status.Inactive));
+    }
+
+    [Test]
+    public async Task UpdateWithoutExplicitRemovalsDoesNotDeactivateOmittedCampuses()
+    {
+        var repository = new Repository();
+        var schoolId = Guid.NewGuid();
+        await repository.SaveWithCampusesAsync(new SchoolModel { Id = schoolId }, []);
+        var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
+            "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria", []);
+
+        await new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(schoolId, request);
+
+        Assert.That(repository.Updated, Is.True);
+        Assert.That(repository.Campuses, Is.Empty);
+    }
+
+    [TestCase(false)]
+    [TestCase(true)]
+    public void UpdateRejectsEmptyOrConflictingRemovalIds(bool conflicting)
+    {
+        var campusId = conflicting ? Guid.NewGuid() : Guid.Empty;
+        var repository = new Repository();
+        var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
+            "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria",
+            conflicting ? [new SchoolCampusRequestDto(campusId, "North", "North street 456", null, null)] : [],
+            RemovedCampusIds: [campusId]);
+
+        Assert.ThrowsAsync<ArgumentException>(() =>
+            new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(Guid.NewGuid(), request));
+        Assert.That(repository.Updated, Is.False);
     }
 
     [TestCase(false)]
