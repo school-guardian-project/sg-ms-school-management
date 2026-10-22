@@ -115,6 +115,12 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
                         ?? throw new KeyNotFoundException($"Campus {campus.Id} does not belong to school {school.Id}");
                 }
 
+                if (campus.Status == Status.Inactive)
+                {
+                    campusEntity.Status = Status.Inactive.ToString();
+                    continue;
+                }
+
                 campusEntity.Name = campus.Name;
                 campusEntity.Address = campus.Address;
                 campusEntity.Latitude = campus.Latitude;

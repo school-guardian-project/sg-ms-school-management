@@ -21,6 +21,12 @@ public sealed class UpdateSchoolWithCampusesService : IUpdateSchoolWithCampusesU
     {
         SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         SchoolCampusRequestRules.Validate(request.Campuses);
+        var removedCampusIds = request.RemovedCampusIds?.Distinct().ToList() ?? [];
+        if (removedCampusIds.Contains(Guid.Empty)
+            || request.Campuses.Any(campus => campus.Id.HasValue && removedCampusIds.Contains(campus.Id.Value)))
+        {
+            throw new ArgumentException("A removed campus must have a valid id and cannot also be updated.");
+        }
         var school = await _repository.FindByIdAsync(id)
             ?? throw new KeyNotFoundException($"School {id} not found");
 
@@ -35,6 +41,12 @@ public sealed class UpdateSchoolWithCampusesService : IUpdateSchoolWithCampusesU
             Longitude = campus.Longitude,
             Status = Status.Active,
         }).ToList();
+        campuses.AddRange(removedCampusIds.Select(campusId => new SchoolCampus
+        {
+            Id = campusId,
+            SchoolId = id,
+            Status = Status.Inactive,
+        }));
         await _repository.UpdateWithCampusesAsync(school, campuses);
     }
 }
