@@ -2,7 +2,7 @@ using AutoMapper;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Domain.Model;
 
-namespace ms_school_management.Api.School.Infrastructure.Controller.Mapper;
+namespace ms_school_management.Api.School.Application.Mapper;
 
 public class SchoolProfile : Profile
 {

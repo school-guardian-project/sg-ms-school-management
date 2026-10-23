@@ -1,4 +1,5 @@
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.Mapper;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
@@ -27,6 +28,6 @@ public sealed class GetAdminSchoolService : IGetAdminSchoolUseCase
         if (school is null)
             return null;
 
-        return new AdminSchoolDto(school.Id, school.Name, school.CityId, school.Status.ToString());
+        return AdminSchoolMapper.ToAdminSchool(school);
     }
 }

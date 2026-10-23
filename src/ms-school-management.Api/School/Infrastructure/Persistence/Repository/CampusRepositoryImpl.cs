@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Infrastructure.Persistence.Context;
 using ms_school_management.Api.School.Infrastructure.Persistence.Entity;
+using ms_school_management.Api.School.Infrastructure.Persistence.Mapper;
 
 namespace ms_school_management.Api.School.Infrastructure.Persistence.Repository;
 
@@ -22,7 +23,7 @@ public sealed class CampusRepositoryImpl : ICampusRepository
             .OrderBy(c => c.Name)
             .ToListAsync(ct);
 
-        return entities.Select(ToModel).ToList();
+        return entities.Select(SchoolPersistenceMapper.ToCampusWithoutCoordinates).ToList();
     }
 
     public async Task<Domain.Model.SchoolCampus?> FindByIdAsync(Guid id, CancellationToken ct)
@@ -32,7 +33,7 @@ public sealed class CampusRepositoryImpl : ICampusRepository
             .Where(c => c.Id == id && c.Status == "Active")
             .FirstOrDefaultAsync(ct);
 
-        return entity is null ? null : ToModel(entity);
+        return entity is null ? null : SchoolPersistenceMapper.ToCampusWithoutCoordinates(entity);
     }
 
     public async Task<Domain.Model.SchoolCampus?> FindBySchoolAndNameAsync(Guid schoolId, string name, CancellationToken ct)
@@ -44,7 +45,7 @@ public sealed class CampusRepositoryImpl : ICampusRepository
                         && c.Status == "Active")
             .FirstOrDefaultAsync(ct);
 
-        return entity is null ? null : ToModel(entity);
+        return entity is null ? null : SchoolPersistenceMapper.ToCampusWithoutCoordinates(entity);
     }
 
     public async Task AddAsync(Domain.Model.SchoolCampus campus, CancellationToken ct)
@@ -60,13 +61,4 @@ public sealed class CampusRepositoryImpl : ICampusRepository
 
         await _context.SaveChangesAsync(ct);
     }
-
-    private static Domain.Model.SchoolCampus ToModel(SchoolCampusEntity e) => new()
-    {
-        Id = e.Id,
-        SchoolId = e.SchoolId,
-        Name = e.Name,
-        Address = e.Address,
-        Status = Enum.Parse<Domain.Model.Status>(e.Status)
-    };
 }

@@ -1,6 +1,7 @@
 using Grpc.Core;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Application.UseCase;
+using ms_school_management.Api.School.Domain.Exceptions;
 using ms_school_management.Api.School.Domain.Ports.In;
 
 namespace ms_school_management.Api.Infrastructure.Grpc;

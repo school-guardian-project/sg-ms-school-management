@@ -4,7 +4,7 @@ using Microsoft.Extensions.DependencyInjection;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.Out;
-using ms_school_management.Api.School.Infrastructure.Controller.Mapper;
+using ms_school_management.Api.School.Application.Mapper;
 using ms_school_management.Api.School.Infrastructure.Persistence.Repository;
 using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
