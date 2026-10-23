@@ -3,11 +3,13 @@ using Microsoft.AspNetCore.RateLimiting;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
+using ms_school_management.Api.Infrastructure.Tenancy;
 
 namespace ms_school_management.Api.School.Infrastructure.Controller;
 
 [ApiController]
 [Route("api/v1/schools")]
+[RequireProfile]
 public sealed class SchoolController : ControllerBase
 {
     private readonly ICreateSchoolUseCase _createSchool;
@@ -44,6 +46,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPost]
+    [RequirePermission("schools.create")]
     public async Task<IActionResult> Create([FromBody] SchoolRequestDto request)
     {
         var id = await _createSchool.ExecuteAsync(request);
@@ -61,6 +64,7 @@ public sealed class SchoolController : ControllerBase
     /// </summary>
     [EnableRateLimiting("writes")]
     [HttpPost("with-campuses")]
+    [RequirePermission("schools.create")]
     public async Task<IActionResult> CreateWithCampuses([FromBody] SchoolWithCampusesRequestDto request)
     {
         try
@@ -78,6 +82,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> List()
     {
         var schools = await _listSchools.ExecuteAsync();
@@ -85,6 +90,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet("search")]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> Search([FromQuery] string search)
     {
         var schools = await _searchSchools.ExecuteAsync(search);
@@ -92,6 +98,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet("{id:guid}")]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> Get(Guid id)
     {
         var school = await _getSchool.ExecuteAsync(id);
@@ -99,6 +106,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet("{id:guid}/campuses")]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> ListCampuses(Guid id)
     {
         var campuses = await _listCampuses.ExecuteAsync(id);
@@ -107,6 +115,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}")]
+    [RequirePermission("schools.update")]
     public async Task<IActionResult> Update(Guid id, [FromBody] SchoolRequestDto request)
     {
         await _updateSchool.ExecuteAsync(id, request);
@@ -115,6 +124,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}/with-campuses")]
+    [RequirePermission("schools.update")]
     public async Task<IActionResult> UpdateWithCampuses(Guid id, [FromBody] SchoolWithCampusesRequestDto request)
     {
         await _updateWithCampuses.ExecuteAsync(id, request);
@@ -123,6 +133,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpDelete("{id:guid}")]
+    [RequirePermission("schools.update")]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _deleteSchool.ExecuteAsync(id);

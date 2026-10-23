@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ms_school_management.Api.Infrastructure.Tenancy;
 using ms_school_management.Api.School.Domain.Ports.In;
 
 namespace ms_school_management.Api.School.Infrastructure.Controller;
@@ -11,6 +12,7 @@ namespace ms_school_management.Api.School.Infrastructure.Controller;
 /// </summary>
 [ApiController]
 [Route("api/v1/campuses")]
+[RequireProfile]
 public sealed class CampusController : ControllerBase
 {
     private readonly IGetCampusUseCase _getCampus;
@@ -26,6 +28,7 @@ public sealed class CampusController : ControllerBase
     /// el adaptador gRPC, que responde <c>found = false</c>).
     /// </summary>
     [HttpGet("{id:guid}")]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> Get(Guid id, CancellationToken cancellationToken)
     {
         var campus = await _getCampus.ExecuteAsync(id, cancellationToken);
