@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.RateLimiting;
 using ms_school_management.Api.Infrastructure.DependencyInjection;
 using ms_school_management.Api.Infrastructure.Grpc;
 using ms_school_management.Api.Infrastructure.Tenancy;
-using ms_school_management.Api.School.Infrastructure.Controller.Mapper;
+using ms_school_management.Api.School.Application.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
 

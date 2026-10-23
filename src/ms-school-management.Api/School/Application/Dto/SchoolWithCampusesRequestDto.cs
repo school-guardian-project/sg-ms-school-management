@@ -16,15 +16,3 @@ public record SchoolWithCampusesRequestDto(
     [Required] IReadOnlyList<SchoolCampusRequestDto> Campuses,
     string? Status = null,
     IReadOnlyList<Guid>? RemovedCampusIds = null);
-
-public record SchoolWithCampusesResponseDto(
-    Guid Id,
-    string Name,
-    IReadOnlyList<SchoolCampusResponseDto> Campuses);
-
-public record SchoolCampusResponseDto(
-    Guid Id,
-    string Name,
-    string Address,
-    decimal? Latitude,
-    decimal? Longitude);

@@ -3,6 +3,7 @@ using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Infrastructure.Persistence.Context;
 using ms_school_management.Api.School.Infrastructure.Persistence.Entity;
+using ms_school_management.Api.School.Infrastructure.Persistence.Mapper;
 
 namespace ms_school_management.Api.School.Infrastructure.Persistence.Repository;
 
@@ -22,7 +23,7 @@ public sealed class SchoolAdminRepositoryImpl : ISchoolAdminRepository
             .Where(sa => sa.ProfileId == profileId && sa.Status == "Active")
             .FirstOrDefaultAsync(ct);
 
-        return entity is null ? null : ToModel(entity);
+        return entity is null ? null : SchoolPersistenceMapper.ToDomain(entity);
     }
 
     public async Task<SchoolAdmin> UpsertAsync(Guid profileId, Guid schoolId, CancellationToken ct)
@@ -44,7 +45,7 @@ public sealed class SchoolAdminRepositoryImpl : ISchoolAdminRepository
             _context.SchoolAdmins.Add(created);
             await _context.SaveChangesAsync(ct);
 
-            return ToModel(created);
+            return SchoolPersistenceMapper.ToDomain(created);
         }
 
         // Reintento del mismo evento o cambio de colegio: actualiza en vez de
@@ -53,14 +54,6 @@ public sealed class SchoolAdminRepositoryImpl : ISchoolAdminRepository
         existing.Status = nameof(Status.Active);
         await _context.SaveChangesAsync(ct);
 
-        return ToModel(existing);
+        return SchoolPersistenceMapper.ToDomain(existing);
     }
-
-    private static SchoolAdmin ToModel(SchoolAdminEntity e) => new()
-    {
-        Id = e.Id,
-        SchoolId = e.SchoolId,
-        ProfileId = e.ProfileId,
-        Status = Enum.Parse<Status>(e.Status)
-    };
 }

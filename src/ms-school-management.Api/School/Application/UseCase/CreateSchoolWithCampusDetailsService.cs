@@ -1,5 +1,6 @@
 using AutoMapper;
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.Mapper;
 using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
@@ -42,9 +43,6 @@ public sealed class CreateSchoolWithCampusDetailsService : ICreateSchoolWithCamp
         return new SchoolWithCampusesResponseDto(
             school.Id,
             school.Name,
-            campuses.Select(ToResponse).ToList());
+            campuses.Select(CampusMapper.ToSchoolCampusResponse).ToList());
     }
-
-    private static SchoolCampusResponseDto ToResponse(SchoolCampus campus) =>
-        new(campus.Id, campus.Name, campus.Address, campus.Latitude, campus.Longitude);
 }

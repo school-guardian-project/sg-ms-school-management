@@ -1,4 +1,5 @@
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.Mapper;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
@@ -16,6 +17,6 @@ public sealed class ListCampusesBySchoolService : IListCampusesBySchoolUseCase
     public async Task<List<CampusListDto>> ExecuteAsync(Guid schoolId, CancellationToken ct)
     {
         var campuses = await _campusRepository.ListBySchoolIdAsync(schoolId, ct);
-        return campuses.Select(c => new CampusListDto(c.Id, c.Name, c.Address)).ToList();
+        return campuses.Select(CampusMapper.ToCampusList).ToList();
     }
 }

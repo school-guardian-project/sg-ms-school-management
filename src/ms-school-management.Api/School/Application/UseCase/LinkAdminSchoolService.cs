@@ -1,4 +1,6 @@
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.Mapper;
+using ms_school_management.Api.School.Domain.Exceptions;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
@@ -32,19 +34,6 @@ public sealed class LinkAdminSchoolService : ILinkAdminSchoolUseCase
 
         var link = await _schoolAdminRepository.UpsertAsync(profileId, schoolId, ct);
 
-        return new LinkedAdminSchoolDto(link.Id, school.Id, school.Name);
-    }
-}
-
-/// <summary>
-/// El colegio referenciado no existe. Se propaga al cliente gRPC como
-/// <c>NOT_FOUND</c> y a REST como 404: un id de colegio que no existe es un dato
-/// invalido, no una falla del servidor.
-/// </summary>
-public sealed class SchoolNotFoundException : Exception
-{
-    public SchoolNotFoundException(Guid schoolId)
-        : base($"School {schoolId} was not found")
-    {
+        return AdminSchoolMapper.ToLinkedAdminSchool(link.Id, school);
     }
 }

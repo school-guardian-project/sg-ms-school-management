@@ -3,6 +3,7 @@ using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Infrastructure.Persistence.Context;
 using ms_school_management.Api.School.Infrastructure.Persistence.Entity;
+using ms_school_management.Api.School.Infrastructure.Persistence.Mapper;
 
 namespace ms_school_management.Api.School.Infrastructure.Persistence.Repository;
 
@@ -17,7 +18,7 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
 
     public async Task SaveAsync(Domain.Model.School school)
     {
-        await _context.Schools.AddAsync(ToEntity(school));
+        await _context.Schools.AddAsync(SchoolPersistenceMapper.ToEntity(school));
         await _context.SaveChangesAsync();
     }
 
@@ -31,8 +32,8 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
         await strategy.ExecuteAsync(async () =>
         {
             await using var transaction = await _context.Database.BeginTransactionAsync();
-            await _context.Schools.AddAsync(ToEntity(school));
-            await _context.Campuses.AddRangeAsync(campuses.Select(ToEntity));
+            await _context.Schools.AddAsync(SchoolPersistenceMapper.ToEntity(school));
+            await _context.Campuses.AddRangeAsync(campuses.Select(SchoolPersistenceMapper.ToEntity));
             await _context.SaveChangesAsync();
             await transaction.CommitAsync();
         });
@@ -41,13 +42,13 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
     public async Task<Domain.Model.School?> FindByIdAsync(Guid id)
     {
         var e = await _context.Schools.FindAsync(id);
-        return e is null ? null : MapToDomain(e);
+        return e is null ? null : SchoolPersistenceMapper.ToDomain(e);
     }
 
     public async Task<IReadOnlyList<Domain.Model.School>> FindAllAsync()
     {
         var entities = await _context.Schools.ToListAsync();
-        return entities.Select(MapToDomain).ToList();
+        return entities.Select(SchoolPersistenceMapper.ToDomain).ToList();
     }
 
     public async Task UpdateAsync(Domain.Model.School school)
@@ -139,7 +140,7 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
             .Where(x => x.SchoolId == schoolId && x.Status == Status.Active.ToString())
             .OrderBy(x => x.Name)
             .ToListAsync();
-        return campuses.Select(MapToDomain).ToList();
+        return campuses.Select(SchoolPersistenceMapper.ToDomain).ToList();
     }
 
     public async Task DeleteAsync(Guid id)
@@ -159,58 +160,4 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
             .Select(c => c.Name)
             .FirstOrDefaultAsync(ct);
     }
-
-    private static Domain.Model.School MapToDomain(SchoolEntity e) => new()
-    {
-        Id = e.Id,
-        CityId = e.CityId,
-        Logo = e.Logo,
-        Name = e.Name,
-        Address = e.Address,
-        Latitude = e.Latitude,
-        Longitude = e.Longitude,
-        Phone = e.Phone,
-        Email = e.Email,
-        Website = e.Website,
-        Theme = e.Theme,
-        Status = Enum.Parse<Status>(e.Status)
-    };
-
-    private static SchoolEntity ToEntity(Domain.Model.School school) => new()
-    {
-        Id = school.Id,
-        CityId = school.CityId,
-        Logo = school.Logo,
-        Name = school.Name,
-        Address = school.Address,
-        Latitude = school.Latitude,
-        Longitude = school.Longitude,
-        Phone = school.Phone,
-        Email = school.Email,
-        Website = school.Website,
-        Theme = school.Theme,
-        Status = school.Status.ToString(),
-    };
-
-    private static SchoolCampusEntity ToEntity(SchoolCampus campus) => new()
-    {
-        Id = campus.Id,
-        SchoolId = campus.SchoolId,
-        Name = campus.Name,
-        Address = campus.Address,
-        Latitude = campus.Latitude,
-        Longitude = campus.Longitude,
-        Status = campus.Status.ToString(),
-    };
-
-    private static SchoolCampus MapToDomain(SchoolCampusEntity campus) => new()
-    {
-        Id = campus.Id,
-        SchoolId = campus.SchoolId,
-        Name = campus.Name,
-        Address = campus.Address,
-        Latitude = campus.Latitude,
-        Longitude = campus.Longitude,
-        Status = Enum.Parse<Status>(campus.Status),
-    };
 }
