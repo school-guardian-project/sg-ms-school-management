@@ -5,6 +5,8 @@ using ms_school_management.Api.School.Domain.Model;
 using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Infrastructure.Controller;
 
+using ms_school_management.Tests.Fakes;
+
 namespace ms_school_management.Tests.School;
 
 /// <summary>
@@ -38,7 +40,7 @@ public class CampusControllerTests
     }
 
     private static CampusController Controller(params SchoolCampus[] campuses) =>
-        new(new GetCampusService(new FakeCampusRepository(campuses)));
+        new(new GetCampusService(new FakeCampusRepository(campuses), new AllowAllSchoolAccessPolicy()));
 
     [Test]
     public async Task Get_CampusExistente_RetornaOkConElDetalle()

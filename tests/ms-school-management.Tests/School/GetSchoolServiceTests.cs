@@ -6,6 +6,8 @@ using ms_school_management.Api.School.Domain.Ports.Out;
 using ms_school_management.Api.School.Application.Mapper;
 using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
+using ms_school_management.Tests.Fakes;
+
 namespace ms_school_management.Tests.School;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
@@ -41,7 +43,7 @@ public class GetSchoolServiceTests
         {
             CityNames = { [cityId] = "Bogota" }
         };
-        var service = new GetSchoolService(repository, CreateMapper());
+        var service = new GetSchoolService(repository, CreateMapper(), new AllowAllSchoolAccessPolicy());
 
         var result = await service.ExecuteAsync(schoolId);
 
@@ -55,7 +57,7 @@ public class GetSchoolServiceTests
     {
         var schoolId = Guid.NewGuid();
         var repository = new FakeSchoolRepository(NewSchool(schoolId, Guid.NewGuid()));
-        var service = new GetSchoolService(repository, CreateMapper());
+        var service = new GetSchoolService(repository, CreateMapper(), new AllowAllSchoolAccessPolicy());
 
         var result = await service.ExecuteAsync(schoolId);
 
@@ -66,7 +68,7 @@ public class GetSchoolServiceTests
     [Test]
     public async Task ExecuteAsync_SinEscuela_RetornaNull()
     {
-        var service = new GetSchoolService(new FakeSchoolRepository(), CreateMapper());
+        var service = new GetSchoolService(new FakeSchoolRepository(), CreateMapper(), new AllowAllSchoolAccessPolicy());
 
         Assert.That(await service.ExecuteAsync(Guid.NewGuid()), Is.Null);
     }

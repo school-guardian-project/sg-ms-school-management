@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using ms_school_management.Api.Infrastructure.Auth;
 using ms_school_management.Api.School.Domain.Ports.In;
 
 namespace ms_school_management.Api.School.Infrastructure.Controller;
@@ -11,6 +12,7 @@ namespace ms_school_management.Api.School.Infrastructure.Controller;
 /// </summary>
 [ApiController]
 [Route("api/v1/campuses")]
+[SchoolAccessDeniedFilter]
 public sealed class CampusController : ControllerBase
 {
     private readonly IGetCampusUseCase _getCampus;

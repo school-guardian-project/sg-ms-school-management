@@ -1,13 +1,21 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using ms_school_management.Api.Infrastructure.Auth;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
 
 namespace ms_school_management.Api.School.Infrastructure.Controller;
 
+/// <summary>
+/// Autorizacion: el alta y el borrado de colegios son del SuperAdmin; listar y
+/// buscar exigen schools.read; editar exige schools.update. Leer un colegio o
+/// sus sedes solo exige token: la regla "solo tu colegio" la aplica la capa de
+/// aplicacion (ISchoolAccessPolicy) y aqui se traduce a 403.
+/// </summary>
 [ApiController]
 [Route("api/v1/schools")]
+[SchoolAccessDeniedFilter]
 public sealed class SchoolController : ControllerBase
 {
     private readonly ICreateSchoolUseCase _createSchool;
@@ -44,6 +52,8 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPost]
+    [RequireRole(RequireRoleAttribute.SuperAdminRoleId)]
+    [RequirePermission("schools.create")]
     public async Task<IActionResult> Create([FromBody] SchoolRequestDto request)
     {
         var id = await _createSchool.ExecuteAsync(request);
@@ -61,6 +71,8 @@ public sealed class SchoolController : ControllerBase
     /// </summary>
     [EnableRateLimiting("writes")]
     [HttpPost("with-campuses")]
+    [RequireRole(RequireRoleAttribute.SuperAdminRoleId)]
+    [RequirePermission("schools.create")]
     public async Task<IActionResult> CreateWithCampuses([FromBody] SchoolWithCampusesRequestDto request)
     {
         try
@@ -78,6 +90,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> List()
     {
         var schools = await _listSchools.ExecuteAsync();
@@ -85,6 +98,7 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet("search")]
+    [RequirePermission("schools.read")]
     public async Task<IActionResult> Search([FromQuery] string search)
     {
         var schools = await _searchSchools.ExecuteAsync(search);
@@ -107,6 +121,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}")]
+    [RequirePermission("schools.update")]
     public async Task<IActionResult> Update(Guid id, [FromBody] SchoolRequestDto request)
     {
         await _updateSchool.ExecuteAsync(id, request);
@@ -115,6 +130,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpPut("{id:guid}/with-campuses")]
+    [RequirePermission("schools.update")]
     public async Task<IActionResult> UpdateWithCampuses(Guid id, [FromBody] SchoolWithCampusesRequestDto request)
     {
         await _updateWithCampuses.ExecuteAsync(id, request);
@@ -123,6 +139,7 @@ public sealed class SchoolController : ControllerBase
 
     [EnableRateLimiting("writes")]
     [HttpDelete("{id:guid}")]
+    [RequireRole(RequireRoleAttribute.SuperAdminRoleId)]
     public async Task<IActionResult> Delete(Guid id)
     {
         await _deleteSchool.ExecuteAsync(id);

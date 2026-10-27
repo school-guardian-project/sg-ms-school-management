@@ -1,8 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using ms_school_management.Api.Infrastructure.Tenancy;
+using ms_school_management.Api.Infrastructure.Auth;
 using ms_school_management.Api.School.Application.Search;
+using ms_school_management.Api.School.Application.Security;
 using ms_school_management.Api.School.Application.Search.Strategy;
 using ms_school_management.Api.School.Application.UseCase;
 using ms_school_management.Api.School.Domain.Ports.In;
@@ -27,6 +28,7 @@ public static class ServiceCollectionExtensions
         services.AddMemoryCache();
         services.AddScoped<ITenantProvider, TenantProvider>();
         services.AddScoped<ITenantSchoolResolver, TenantSchoolResolver>();
+        services.AddScoped<ISchoolAccessPolicy, SchoolAccessPolicy>();
         services.AddScoped<ICreateSchoolUseCase, CreateSchoolService>();
         services.AddScoped<ICreateSchoolWithCampusDetailsUseCase, CreateSchoolWithCampusDetailsService>();
         services.AddScoped<IGetSchoolUseCase, GetSchoolService>();

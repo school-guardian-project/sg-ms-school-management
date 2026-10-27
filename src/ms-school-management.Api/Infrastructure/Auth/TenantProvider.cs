@@ -1,12 +1,13 @@
 using System.Security.Claims;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
-namespace ms_school_management.Api.Infrastructure.Tenancy;
+namespace ms_school_management.Api.Infrastructure.Auth;
 
 /// <summary>
-/// Lee los claims del JWT (HS256, sin issuer/audience) que ms-iam emite:
-/// sub (profileId), roleId (1=Admin, 2=Student, 3=Driver, 4=Parent,
-/// 5=SuperAdmin), campusId y schoolId (ambos opcionales).
+/// Lee los claims del access token RS256 de ms-iam, ya validado por
+/// <see cref="JwtAuthenticationExtensions"/>: sub (profileId), roleId
+/// (1=Admin, 2=Student, 3=Driver, 4=Parent, 5=SuperAdmin), campusId y
+/// schoolId (ambos opcionales).
 /// </summary>
 public sealed class TenantProvider : ITenantProvider
 {
@@ -19,13 +20,13 @@ public sealed class TenantProvider : ITenantProvider
         _user = httpContextAccessor.HttpContext?.User;
     }
 
-    public int? RoleId => ParseInt(GetClaim("roleId"));
+    public int? RoleId => ParseInt(GetClaim(SgClaimTypes.RoleId));
 
-    public Guid? CampusId => ParseGuid(GetClaim("campusId"));
+    public Guid? CampusId => ParseGuid(GetClaim(SgClaimTypes.CampusId));
 
-    public Guid? SchoolId => ParseGuid(GetClaim("schoolId"));
+    public Guid? SchoolId => ParseGuid(GetClaim(SgClaimTypes.SchoolId));
 
-    public Guid? ProfileId => ParseGuid(GetClaim("sub") ?? GetClaim(ClaimTypes.NameIdentifier));
+    public Guid? ProfileId => ParseGuid(GetClaim(SgClaimTypes.Subject));
 
     public bool ShouldFilter =>
         _user?.Identity?.IsAuthenticated == true && RoleId is not null && RoleId != SuperAdminRoleId;
