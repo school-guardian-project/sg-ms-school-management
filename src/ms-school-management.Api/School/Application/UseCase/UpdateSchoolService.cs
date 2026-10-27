@@ -1,5 +1,6 @@
 using AutoMapper;
 using ms_school_management.Api.School.Application.Dto;
+using ms_school_management.Api.School.Application.Security;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
@@ -9,15 +10,19 @@ public sealed class UpdateSchoolService : IUpdateSchoolUseCase
 {
     private readonly ISchoolRepository _repository;
     private readonly IMapper _mapper;
+    private readonly ISchoolAccessPolicy _accessPolicy;
 
-    public UpdateSchoolService(ISchoolRepository repository, IMapper mapper)
+    public UpdateSchoolService(ISchoolRepository repository, IMapper mapper, ISchoolAccessPolicy accessPolicy)
     {
         _repository = repository;
         _mapper = mapper;
+        _accessPolicy = accessPolicy;
     }
 
     public async Task ExecuteAsync(Guid id, SchoolRequestDto request)
     {
+        await _accessPolicy.EnsureCanAccessAsync(id);
+
         SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         var school = await _repository.FindByIdAsync(id)
             ?? throw new KeyNotFoundException($"School {id} not found");

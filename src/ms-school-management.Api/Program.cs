@@ -2,7 +2,7 @@ using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.RateLimiting;
 using ms_school_management.Api.Infrastructure.DependencyInjection;
 using ms_school_management.Api.Infrastructure.Grpc;
-using ms_school_management.Api.Infrastructure.Tenancy;
+using ms_school_management.Api.Infrastructure.Auth;
 using ms_school_management.Api.School.Application.Mapper;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -57,11 +57,9 @@ builder.Services.AddAutoMapper(cfg => cfg.AddProfile<SchoolProfile>());
 builder.Services.AddSchoolManagementServices(builder.Configuration);
 builder.Services.AddGrpc();
 
-// El gateway (Kong) valida el access token RS256 y reenvía la identidad en las
-// cabeceras X-User-*. Aquí solo se confía en ellas para poblar HttpContext.User
-// y filtrar por tenant; sin cabeceras el request sigue anónimo y compatible con
-// los flujos internos (gRPC).
-builder.Services.AddGatewayAuthentication();
+// El servicio valida por su cuenta el access token RS256 de ms-iam (JWKS):
+// la identidad sale del token, no de las cabeceras X-User-* del gateway.
+builder.Services.AddJwtAuthentication(builder.Configuration);
 
 var app = builder.Build();
 
@@ -71,9 +69,12 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthentication();
+app.UseAuthorization();
 app.UseRateLimiter();
 
-app.MapControllers();
+// Todo endpoint REST exige un access token valido. El gRPC interno
+// (SchoolManagementGrpcService, puerto 5001) no pasa por aqui.
+app.MapControllers().RequireAuthorization();
 app.MapGrpcService<SchoolManagementGrpcService>();
 
 app.Run();
