@@ -22,6 +22,8 @@ public sealed class CreateSchoolWithCampusDetailsService : ICreateSchoolWithCamp
     {
         SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         SchoolCampusRequestRules.Validate(request.Campuses);
+        if (request.Campuses.Any(campus => campus.Status != "Active"))
+            throw new ArgumentException("New campuses must be active.");
         var school = _mapper.Map<Domain.Model.School>(request);
         school.Id = Guid.NewGuid();
         school.Status = Status.Active;

@@ -4,5 +4,5 @@ namespace ms_school_management.Api.School.Domain.Ports.In;
 
 public interface IListSchoolCampusesUseCase
 {
-    Task<IReadOnlyList<SchoolCampusResponseDto>> ExecuteAsync(Guid schoolId);
+    Task<IReadOnlyList<SchoolCampusResponseDto>> ExecuteAsync(Guid schoolId, bool includeInactive = false);
 }

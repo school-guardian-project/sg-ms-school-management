@@ -1,5 +1,21 @@
 # sg-ms-school-management
 
+## School and campus status management
+
+`GET /api/v1/schools/{id}/campuses` continues to return active campuses by default.
+School editing uses `?includeInactive=true` to include inactive campuses under the
+same school access policy. Responses include `status` (`Active` or `Inactive`).
+Campus lookup by ID and internal assignment lookups remain active-only.
+
+`PUT /api/v1/schools/{id}/with-campuses` accepts a campus `status`, defaulting to
+`Active` for older clients. Existing inactive campuses remain inactive when
+submitted unchanged; explicitly submitting `Active` reactivates them. Ownership
+is checked against the requested school inside the atomic update transaction.
+`removedCampusIds` still deactivates explicitly removed campuses.
+
+School reactivation uses the existing authorized school PUT with `status: Active`.
+It does not reactivate other associated records automatically.
+
 Cada nuevo colegio se guarda, en una sola transaccion, con una `Sede central`
 que hereda su direccion y coordenadas. El endpoint `with-campuses` recibe solamente
 sedes adicionales, que pueden ser una lista vacia. No es necesario registrarlas

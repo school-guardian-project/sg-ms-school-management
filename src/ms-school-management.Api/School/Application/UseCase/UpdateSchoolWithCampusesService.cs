@@ -44,7 +44,7 @@ public sealed class UpdateSchoolWithCampusesService : IUpdateSchoolWithCampusesU
             Address = campus.Address.Trim(),
             Latitude = campus.Latitude,
             Longitude = campus.Longitude,
-            Status = Status.Active,
+            Status = Enum.Parse<Status>(campus.Status),
         }).ToList();
         campuses.AddRange(removedCampusIds.Select(campusId => new SchoolCampus
         {

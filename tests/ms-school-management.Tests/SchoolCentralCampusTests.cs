@@ -37,7 +37,7 @@ public class SchoolCentralCampusTests
             Campuses = campuses;
             return Task.CompletedTask;
         }
-        public Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId) => throw new NotSupportedException();
+        public Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId, bool includeInactive = false) => throw new NotSupportedException();
         public Task DeleteAsync(Guid id) => throw new NotSupportedException();
         public Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default) =>
             throw new NotSupportedException();

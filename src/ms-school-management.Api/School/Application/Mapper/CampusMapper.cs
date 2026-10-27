@@ -17,7 +17,7 @@ public static class CampusMapper
 
     /// <summary>Sede -> respuesta del alta/edicion y del listado /schools/{id}/campuses.</summary>
     public static SchoolCampusResponseDto ToSchoolCampusResponse(SchoolCampus campus)
-        => new(campus.Id, campus.Name, campus.Address, campus.Latitude, campus.Longitude);
+        => new(campus.Id, campus.Name, campus.Address, campus.Latitude, campus.Longitude, campus.Status.ToString());
 
     /// <summary>Sede -> resumen ligero (id, nombre, direccion) del listado por colegio.</summary>
     public static CampusListDto ToCampusList(SchoolCampus campus)

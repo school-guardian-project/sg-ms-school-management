@@ -17,11 +17,11 @@ public sealed class ListSchoolCampusesService : IListSchoolCampusesUseCase
         _accessPolicy = accessPolicy;
     }
 
-    public async Task<IReadOnlyList<SchoolCampusResponseDto>> ExecuteAsync(Guid schoolId)
+    public async Task<IReadOnlyList<SchoolCampusResponseDto>> ExecuteAsync(Guid schoolId, bool includeInactive = false)
     {
         await _accessPolicy.EnsureCanAccessAsync(schoolId);
 
-        var campuses = await _repository.FindCampusesBySchoolAsync(schoolId);
+        var campuses = await _repository.FindCampusesBySchoolAsync(schoolId, includeInactive);
         return campuses.Select(CampusMapper.ToSchoolCampusResponse).ToList();
     }
 }
