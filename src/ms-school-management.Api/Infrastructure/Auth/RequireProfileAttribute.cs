@@ -5,8 +5,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace ms_school_management.Api.Infrastructure.Auth;
 
 /// <summary>
-/// Exige un perfil autenticado (claim "sub" con GUID valido, inyectado por el
-/// gateway). Responde 401 cuando la peticion no trae identidad.
+/// Exige un perfil autenticado (claim "sub" con GUID valido). Responde 401
+/// cuando la peticion no trae identidad.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class RequireProfileAttribute : Attribute, IAsyncAuthorizationFilter, IOrderedFilter
@@ -16,7 +16,7 @@ public sealed class RequireProfileAttribute : Attribute, IAsyncAuthorizationFilt
 
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        var profileId = context.HttpContext.User.FindFirstValue("sub");
+        var profileId = context.HttpContext.User.FindFirstValue(SgClaimTypes.Subject);
         if (!Guid.TryParse(profileId, out var id) || id == Guid.Empty)
         {
             context.Result = new UnauthorizedResult();

@@ -8,6 +8,8 @@ using ms_school_management.Api.School.Application.Mapper;
 using NUnit.Framework;
 using SchoolModel = ms_school_management.Api.School.Domain.Model.School;
 
+using ms_school_management.Tests.Fakes;
+
 namespace ms_school_management.Tests;
 
 [FixtureLifeCycle(LifeCycle.InstancePerTestCase)]
@@ -59,7 +61,7 @@ public class SchoolCentralCampusTests
             [new SchoolCampusRequestDto(retainedId, "North", "North street 456", null, null)],
             RemovedCampusIds: [removedId, removedId]);
 
-        await new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(schoolId, request);
+        await new UpdateSchoolWithCampusesService(repository, Mapper(), new AllowAllSchoolAccessPolicy()).ExecuteAsync(schoolId, request);
 
         Assert.That(repository.Campuses.Count, Is.EqualTo(2));
         Assert.That(repository.Campuses.Single(c => c.Id == retainedId).Status, Is.EqualTo(Status.Active));
@@ -75,7 +77,7 @@ public class SchoolCentralCampusTests
         var request = new SchoolWithCampusesRequestDto(Guid.NewGuid(), [], "Test school",
             "Central street 123", null, null, 3001234567, "school@example.invalid", null, "Primaria", []);
 
-        await new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(schoolId, request);
+        await new UpdateSchoolWithCampusesService(repository, Mapper(), new AllowAllSchoolAccessPolicy()).ExecuteAsync(schoolId, request);
 
         Assert.That(repository.Updated, Is.True);
         Assert.That(repository.Campuses, Is.Empty);
@@ -93,7 +95,7 @@ public class SchoolCentralCampusTests
             RemovedCampusIds: [campusId]);
 
         Assert.ThrowsAsync<ArgumentException>(() =>
-            new UpdateSchoolWithCampusesService(repository, Mapper()).ExecuteAsync(Guid.NewGuid(), request));
+            new UpdateSchoolWithCampusesService(repository, Mapper(), new AllowAllSchoolAccessPolicy()).ExecuteAsync(Guid.NewGuid(), request));
         Assert.That(repository.Updated, Is.False);
     }
 

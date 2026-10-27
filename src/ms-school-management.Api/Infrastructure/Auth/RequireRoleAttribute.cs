@@ -5,9 +5,8 @@ using Microsoft.AspNetCore.Mvc.Filters;
 namespace ms_school_management.Api.Infrastructure.Auth;
 
 /// <summary>
-/// Exige que el claim "roleId" que el gateway (Kong) inyecta tras validar el
-/// access token este dentro de los roles permitidos. Es la comprobacion de rol
-/// local del servicio: no confia en que el gateway ya haya autorizado.
+/// Exige que el claim "roleId" del access token este dentro de los roles
+/// permitidos. Responde 401 sin token valido y 403 con un rol no permitido.
 /// </summary>
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public sealed class RequireRoleAttribute : Attribute, IAsyncAuthorizationFilter, IOrderedFilter
@@ -30,7 +29,14 @@ public sealed class RequireRoleAttribute : Attribute, IAsyncAuthorizationFilter,
 
     public Task OnAuthorizationAsync(AuthorizationFilterContext context)
     {
-        var roleId = context.HttpContext.User.FindFirstValue("roleId");
+        var user = context.HttpContext.User;
+        if (user?.Identity?.IsAuthenticated != true)
+        {
+            context.Result = new UnauthorizedResult();
+            return Task.CompletedTask;
+        }
+
+        var roleId = user.FindFirstValue(SgClaimTypes.RoleId);
         if (!Array.Exists(_allowedRoleIds, id => id == roleId))
         {
             context.Result = new StatusCodeResult(StatusCodes.Status403Forbidden);

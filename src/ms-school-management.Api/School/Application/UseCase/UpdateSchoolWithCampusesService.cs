@@ -1,6 +1,7 @@
 using AutoMapper;
 using ms_school_management.Api.School.Application.Dto;
 using ms_school_management.Api.School.Domain.Model;
+using ms_school_management.Api.School.Application.Security;
 using ms_school_management.Api.School.Domain.Ports.In;
 using ms_school_management.Api.School.Domain.Ports.Out;
 
@@ -10,15 +11,19 @@ public sealed class UpdateSchoolWithCampusesService : IUpdateSchoolWithCampusesU
 {
     private readonly ISchoolRepository _repository;
     private readonly IMapper _mapper;
+    private readonly ISchoolAccessPolicy _accessPolicy;
 
-    public UpdateSchoolWithCampusesService(ISchoolRepository repository, IMapper mapper)
+    public UpdateSchoolWithCampusesService(ISchoolRepository repository, IMapper mapper, ISchoolAccessPolicy accessPolicy)
     {
         _repository = repository;
         _mapper = mapper;
+        _accessPolicy = accessPolicy;
     }
 
     public async Task ExecuteAsync(Guid id, SchoolWithCampusesRequestDto request)
     {
+        await _accessPolicy.EnsureCanAccessAsync(id);
+
         SchoolLocationRequestRules.Validate(request.Latitude, request.Longitude);
         SchoolCampusRequestRules.Validate(request.Campuses);
         var removedCampusIds = request.RemovedCampusIds?.Distinct().ToList() ?? [];

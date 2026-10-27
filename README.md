@@ -17,9 +17,6 @@ sin modificar registros ni asignar coordenadas a ubicaciones existentes.
 `006-widen-school-phone.sql` amplia `School.School.Phone` a `BIGINT` sin alterar
 sus valores, para que coincida con el tipo `long` utilizado por el servicio.
 
-La relacion administrativa ya existe en `School.SchoolAdmin` y es mantenida por IAM.
-Los demas usuarios se relacionan a la escuela mediante `Iam.Profile.CampuseId`
-y `School.SchoolCampus.SchoolId`.
 
 Al actualizar con `PUT /api/v1/schools/{id}/with-campuses`, el campo opcional
 `removedCampusIds` indica las sedes que se desactivan en la misma transaccion.
