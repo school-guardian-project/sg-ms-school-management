@@ -5,4 +5,5 @@ public record SchoolCampusResponseDto(
     string Name,
     string Address,
     decimal? Latitude,
-    decimal? Longitude);
+    decimal? Longitude,
+    string Status = "Active");

@@ -10,7 +10,7 @@ public interface ISchoolRepository
     Task<IReadOnlyList<Domain.Model.School>> FindAllAsync();
     Task UpdateAsync(Domain.Model.School school);
     Task UpdateWithCampusesAsync(Domain.Model.School school, IReadOnlyList<SchoolCampus> campuses);
-    Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId);
+    Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId, bool includeInactive = false);
     Task DeleteAsync(Guid id);
     Task<string?> GetCityNameAsync(Guid cityId, CancellationToken ct = default);
 }

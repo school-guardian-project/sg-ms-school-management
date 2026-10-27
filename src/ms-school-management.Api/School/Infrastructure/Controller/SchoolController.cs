@@ -113,9 +113,9 @@ public sealed class SchoolController : ControllerBase
     }
 
     [HttpGet("{id:guid}/campuses")]
-    public async Task<IActionResult> ListCampuses(Guid id)
+    public async Task<IActionResult> ListCampuses(Guid id, [FromQuery] bool includeInactive = false)
     {
-        var campuses = await _listCampuses.ExecuteAsync(id);
+        var campuses = await _listCampuses.ExecuteAsync(id, includeInactive);
         return Ok(campuses);
     }
 

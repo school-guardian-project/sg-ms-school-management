@@ -134,10 +134,10 @@ public sealed class SchoolRepositoryImpl : ISchoolRepository
         });
     }
 
-    public async Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId)
+    public async Task<IReadOnlyList<SchoolCampus>> FindCampusesBySchoolAsync(Guid schoolId, bool includeInactive = false)
     {
         var campuses = await _context.Campuses
-            .Where(x => x.SchoolId == schoolId && x.Status == Status.Active.ToString())
+            .Where(x => x.SchoolId == schoolId && (includeInactive || x.Status == Status.Active.ToString()))
             .OrderBy(x => x.Name)
             .ToListAsync();
         return campuses.Select(SchoolPersistenceMapper.ToDomain).ToList();

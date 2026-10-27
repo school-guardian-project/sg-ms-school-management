@@ -10,6 +10,11 @@ internal static class SchoolCampusRequestRules
         var ids = new HashSet<Guid>();
         foreach (var campus in campuses)
         {
+            if (campus.Status is not ("Active" or "Inactive")
+                || (campus.Status == "Inactive" && (!campus.Id.HasValue || campus.Id == Guid.Empty)))
+            {
+                throw new ArgumentException("Campus status must be Active or Inactive; inactive campuses require an existing id.", nameof(campuses));
+            }
             if (string.IsNullOrWhiteSpace(campus.Name) || campus.Name.Length > 30)
             {
                 throw new ArgumentException("Campus names must contain 1 to 30 characters.", nameof(campuses));
@@ -20,7 +25,7 @@ internal static class SchoolCampusRequestRules
                 throw new ArgumentException("Campus addresses must contain 5 to 30 characters.", nameof(campuses));
             }
 
-            if (!names.Add(campus.Name.Trim()))
+            if (campus.Status == "Active" && !names.Add(campus.Name.Trim()))
             {
                 throw new ArgumentException($"Campus name '{campus.Name}' is duplicated.", nameof(campuses));
             }
