@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Security.Claims;
 
-namespace ms_school_management.Api.Infrastructure.Tenancy;
+namespace ms_school_management.Api.Infrastructure.Auth;
 
 /// <summary>
 /// Exige que la peticion incluya el permiso indicado (FR-2.1). El permiso viaja
