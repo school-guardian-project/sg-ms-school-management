@@ -56,8 +56,18 @@ public sealed class SchoolController : ControllerBase
     [RequirePermission("schools.create")]
     public async Task<IActionResult> Create([FromBody] SchoolRequestDto request)
     {
-        var id = await _createSchool.ExecuteAsync(request);
-        return CreatedAtAction(nameof(Get), new { id }, null);
+        try
+        {
+            var id = await _createSchool.ExecuteAsync(request);
+            return CreatedAtAction(nameof(Get), new { id }, null);
+        }
+        catch (ArgumentException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid request",
+                detail: ex.Message);
+        }
     }
 
     /// <summary>
@@ -124,8 +134,18 @@ public sealed class SchoolController : ControllerBase
     [RequirePermission("schools.update")]
     public async Task<IActionResult> Update(Guid id, [FromBody] SchoolRequestDto request)
     {
-        await _updateSchool.ExecuteAsync(id, request);
-        return NoContent();
+        try
+        {
+            await _updateSchool.ExecuteAsync(id, request);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid request",
+                detail: ex.Message);
+        }
     }
 
     [EnableRateLimiting("writes")]
@@ -133,8 +153,18 @@ public sealed class SchoolController : ControllerBase
     [RequirePermission("schools.update")]
     public async Task<IActionResult> UpdateWithCampuses(Guid id, [FromBody] SchoolWithCampusesRequestDto request)
     {
-        await _updateWithCampuses.ExecuteAsync(id, request);
-        return NoContent();
+        try
+        {
+            await _updateWithCampuses.ExecuteAsync(id, request);
+            return NoContent();
+        }
+        catch (ArgumentException ex)
+        {
+            return Problem(
+                statusCode: StatusCodes.Status400BadRequest,
+                title: "Invalid request",
+                detail: ex.Message);
+        }
     }
 
     [EnableRateLimiting("writes")]

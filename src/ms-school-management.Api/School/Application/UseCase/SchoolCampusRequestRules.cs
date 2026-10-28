@@ -22,7 +22,7 @@ internal static class SchoolCampusRequestRules
 
             if (string.IsNullOrWhiteSpace(campus.Address) || campus.Address.Length < 5 || campus.Address.Length > 255)
             {
-                throw new ArgumentException("Campus addresses must contain 5 to 30 characters.", nameof(campuses));
+                throw new ArgumentException("Campus addresses must contain 5 to 255 characters.", nameof(campuses));
             }
 
             if (campus.Status == "Active" && !names.Add(campus.Name.Trim()))
