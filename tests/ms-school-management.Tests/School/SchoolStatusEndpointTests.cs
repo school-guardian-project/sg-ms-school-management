@@ -231,6 +231,94 @@ public class SchoolStatusEndpointTests
         "Main street", null, null, 3001234567, "school@test.com", null, "Primaria",
         [new SchoolCampusRequestDto(_inactiveId, "North", "North street", 4.5m, -74m, status)]);
 
+    [Test]
+    public async Task Address_limits_are_consistent_for_creation_and_update(
+        [Values(false, true)] bool create,
+        [Values(30, 31, 255, 256)] int length,
+        [Values(false, true)] bool coordinates)
+    {
+        var address = new string('A', length);
+        var campus = new SchoolCampusRequestDto(create ? null : _inactiveId, "North", address,
+            coordinates ? 0m : null, coordinates ? -180m : null);
+        var request = Request("Active") with
+        {
+            Address = address,
+            Latitude = coordinates ? 90m : null,
+            Longitude = coordinates ? 180m : null,
+            Campuses = [campus]
+        };
+        var response = create
+            ? await _client.PostAsJsonAsync("/api/v1/schools/with-campuses", request)
+            : await _client.PutAsJsonAsync($"/api/v1/schools/{_schoolId}/with-campuses", request);
+        Assert.That(response.StatusCode, Is.EqualTo(length > 255 ? HttpStatusCode.BadRequest
+            : create ? HttpStatusCode.Created : HttpStatusCode.NoContent));
+        using var scope = _app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<SchoolManagementContext>();
+        if (length > 255)
+        {
+            Assert.That(await context.Schools.CountAsync(), Is.EqualTo(2));
+            Assert.That((await context.Schools.FindAsync(_schoolId))!.Address, Is.EqualTo("Main street"));
+            Assert.That((await context.Campuses.FindAsync(_inactiveId))!.Address, Is.EqualTo("Campus street"));
+            return;
+        }
+        var id = create
+            ? (await response.Content.ReadFromJsonAsync<SchoolWithCampusesResponseDto>())!.Id
+            : _schoolId;
+        var school = (await context.Schools.FindAsync(id))!;
+        var savedCampus = await context.Campuses.SingleAsync(c => c.SchoolId == id && c.Name == "North");
+        Assert.That(school.Address, Is.EqualTo(address));
+        Assert.That(savedCampus.Address, Is.EqualTo(address));
+        Assert.That(school.Latitude, Is.EqualTo(request.Latitude));
+        Assert.That(school.Longitude, Is.EqualTo(request.Longitude));
+        Assert.That(savedCampus.Latitude, Is.EqualTo(campus.Latitude));
+        Assert.That(savedCampus.Longitude, Is.EqualTo(campus.Longitude));
+    }
+
+    [Test]
+    public async Task Incomplete_coordinate_pairs_return_problem_without_saving(
+        [Values(false, true)] bool create,
+        [Values(false, true)] bool campus,
+        [Values(false, true)] bool latitudeOnly)
+    {
+        decimal? latitude = latitudeOnly ? 2.9m : null;
+        decimal? longitude = latitudeOnly ? null : -75.2m;
+        var request = Request("Active") with
+        {
+            Latitude = campus ? null : latitude,
+            Longitude = campus ? null : longitude,
+            Campuses = [new SchoolCampusRequestDto(create ? null : _inactiveId, "North",
+                "North street", campus ? latitude : null, campus ? longitude : null)]
+        };
+        var response = create
+            ? await _client.PostAsJsonAsync("/api/v1/schools/with-campuses", request)
+            : await _client.PutAsJsonAsync($"/api/v1/schools/{_schoolId}/with-campuses", request);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        var problem = await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>();
+        Assert.That(problem!.Status, Is.EqualTo(400));
+        Assert.That(problem.Detail, Does.Contain("coordinates must be supplied together"));
+        using var scope = _app.Services.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<SchoolManagementContext>();
+        Assert.That(await context.Schools.CountAsync(), Is.EqualTo(2));
+        Assert.That((await context.Schools.FindAsync(_schoolId))!.Address, Is.EqualTo("Main street"));
+        Assert.That(await CampusStatus(_inactiveId), Is.EqualTo("Inactive"));
+    }
+
+    [Test]
+    public async Task Plain_school_writes_reject_incomplete_coordinates(
+        [Values(false, true)] bool create,
+        [Values(false, true)] bool latitudeOnly)
+    {
+        var request = new SchoolRequestDto(Guid.NewGuid(), [], "School", "Main street",
+            latitudeOnly ? 2.9m : null, latitudeOnly ? null : -75.2m,
+            3001234567, "school@test.com", null, "Primaria");
+        var response = create
+            ? await _client.PostAsJsonAsync("/api/v1/schools", request)
+            : await _client.PutAsJsonAsync($"/api/v1/schools/{_schoolId}", request);
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+        var problem = await response.Content.ReadFromJsonAsync<Microsoft.AspNetCore.Mvc.ProblemDetails>();
+        Assert.That(problem!.Detail, Does.Contain("coordinates must be supplied together"));
+    }
+
     private void SetRole(string role)
     {
         _client.DefaultRequestHeaders.Remove("X-Test-Role");
@@ -278,6 +366,8 @@ public class SchoolStatusEndpointTests
             {
                 claims.Add(new Claim(SgClaimTypes.Permissions, "schools.update"));
                 claims.Add(new Claim(SgClaimTypes.Permissions, "schools.read"));
+                if (role == "5")
+                    claims.Add(new Claim(SgClaimTypes.Permissions, "schools.create"));
             }
             var user = new ClaimsPrincipal(new ClaimsIdentity(claims, Scheme.Name));
             return Task.FromResult(AuthenticateResult.Success(new AuthenticationTicket(user, Scheme.Name)));

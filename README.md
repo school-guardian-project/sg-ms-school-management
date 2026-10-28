@@ -33,6 +33,14 @@ sin modificar registros ni asignar coordenadas a ubicaciones existentes.
 `006-widen-school-phone.sql` amplia `School.School.Phone` a `BIGINT` sin alterar
 sus valores, para que coincida con el tipo `long` utilizado por el servicio.
 
+`007-widen-school-address.sql` widens school and campus addresses to
+`VARCHAR(255) NOT NULL` without truncating data. Apply it through Liquibase to
+the environment database: the 255-character DTO and EF limit does not modify
+existing columns. The 5-character minimum and optional `DECIMAL(10,7)`
+coordinates remain unchanged; latitude and longitude must be supplied together
+or both set to `null`. School POST and PUT endpoints return `400` with Problem
+Details for request validation errors, including incomplete coordinate pairs.
+
 
 Al actualizar con `PUT /api/v1/schools/{id}/with-campuses`, el campo opcional
 `removedCampusIds` indica las sedes que se desactivan en la misma transaccion.
