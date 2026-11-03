@@ -1,49 +1,61 @@
-# sg-ms-school-management
+# Servicio School Management
 
-## School and campus status management
+School and campus management microservice for School Guardian. Handles school creation, campus status management (active/inactive), and school reactivation within atomic transactions. Built with .NET.
 
-`GET /api/v1/schools/{id}/campuses` continues to return active campuses by default.
-School editing uses `?includeInactive=true` to include inactive campuses under the
-same school access policy. Responses include `status` (`Active` or `Inactive`).
-Campus lookup by ID and internal assignment lookups remain active-only.
+## Getting Started
 
-`PUT /api/v1/schools/{id}/with-campuses` accepts a campus `status`, defaulting to
-`Active` for older clients. Existing inactive campuses remain inactive when
-submitted unchanged; explicitly submitting `Active` reactivates them. Ownership
-is checked against the requested school inside the atomic update transaction.
-`removedCampusIds` still deactivates explicitly removed campuses.
+These instructions will give you a copy of the project up and running on your local machine for development and testing purposes. See deployment for notes on deploying the project on a live system.
 
-School reactivation uses the existing authorized school PUT with `status: Active`.
-It does not reactivate other associated records automatically.
+### Prerequisites
 
-Cada nuevo colegio se guarda, en una sola transaccion, con una `Sede central`
-que hereda su direccion y coordenadas. El endpoint `with-campuses` recibe solamente
-sedes adicionales, que pueden ser una lista vacia. No es necesario registrarlas
-para crear un colegio.
-Para conservar compatibilidad con clientes anteriores, si el POST ya incluye una
-sede llamada `Sede central` (sin distinguir mayusculas), se conserva esa sede
-explicita y no se crea una segunda con el mismo nombre.
+Requirements for the software and other tools to build, test and push:
 
-El controlador utiliza `SchoolWithCampusesRequestDto` y el unico caso de uso
-`CreateSchoolWithCampusesService`, que recibe direcciones y coordenadas por sede.
+- .NET SDK
+- Docker
+- Docker Compose
+- The `sg-services-network` Docker network (external, shared across services)
 
-La migracion `database/ms-school-db/01-ddl/04-alter/005-add-school-location.sql`
-agrega las columnas opcionales de ubicacion a colegios y sedes cuando no existen,
-sin modificar registros ni asignar coordenadas a ubicaciones existentes.
-`006-widen-school-phone.sql` amplia `School.School.Phone` a `BIGINT` sin alterar
-sus valores, para que coincida con el tipo `long` utilizado por el servicio.
+### Installing
 
-`007-widen-school-address.sql` widens school and campus addresses to
-`VARCHAR(255) NOT NULL` without truncating data. Apply it through Liquibase to
-the environment database: the 255-character DTO and EF limit does not modify
-existing columns. The 5-character minimum and optional `DECIMAL(10,7)`
-coordinates remain unchanged; latitude and longitude must be supplied together
-or both set to `null`. School POST and PUT endpoints return `400` with Problem
-Details for request validation errors, including incomplete coordinate pairs.
+A step by step series of examples that tell you how to get a development environment running.
 
+Create the external network if it does not exist:
 
-Al actualizar con `PUT /api/v1/schools/{id}/with-campuses`, el campo opcional
-`removedCampusIds` indica las sedes que se desactivan en la misma transaccion.
-Se conservan sus datos y relaciones; los listados de sedes activas ya no las muestran.
-Cada id debe pertenecer al colegio y no puede aparecer tambien en `campuses`.
-Omitir una sede de `campuses` no la desactiva: se requiere su id explicito.
+    docker network create sg-services-network
+
+Start the service:
+
+    docker compose up -d
+
+The API listens on port 8080 and exposes an internal gRPC endpoint (h2c) on port 5001 for consumption by other services. The gRPC port is not published to the host by default but is mapped for debugging with `grpcurl`. Environment variables are loaded from `.env`.
+
+## Running the tests
+
+Explain how to run the automated tests for this system.
+
+### Sample Tests
+
+Tests are executed against the test service that runs in Docker Compose for each service:
+
+    docker compose --profile tests run ms-school-management.tests
+
+### Style test
+
+Checks if the best practices and the right coding style has been used, validated through the test service in Docker Compose.
+
+## Deployment
+
+Deployment is performed via GitHub Actions to an AWS EC2 instance.
+
+## Built With
+
+- .NET
+- Docker Compose — Local development stack
+
+## Contributing
+
+Please read [CONTRIBUTING.md](https://github.com/school-guardian-project/.github/blob/main/CONTRIBUTING.md) for details on our code of conduct and the process for submitting pull requests.
+
+## License
+
+This project is licensed under the SCHOOL GUARDIAN PROPRIETARY SOFTWARE LICENSE Version 1.0 — 2026. See the [LICENSE](LICENSE) file for details.
