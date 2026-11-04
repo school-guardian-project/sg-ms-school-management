@@ -9,4 +9,6 @@ namespace ms_school_management.Tests.Fakes;
 public sealed class AllowAllSchoolAccessPolicy : ISchoolAccessPolicy
 {
     public Task EnsureCanAccessAsync(Guid schoolId, CancellationToken ct = default) => Task.CompletedTask;
+
+    public Task<SchoolScope> GetScopeAsync(CancellationToken ct = default) => Task.FromResult(SchoolScope.All);
 }

@@ -31,4 +31,12 @@ public sealed class SchoolAccessPolicy : ISchoolAccessPolicy
             throw new SchoolAccessDeniedException(schoolId);
         }
     }
+
+    public async Task<SchoolScope> GetScopeAsync(CancellationToken ct = default)
+    {
+        if (!_tenant.ShouldFilter) return SchoolScope.All;
+
+        var allowedSchoolId = await _tenantSchoolResolver.ResolveAllowedSchoolIdAsync(ct);
+        return allowedSchoolId is null ? SchoolScope.Nothing : SchoolScope.Only(allowedSchoolId.Value);
+    }
 }

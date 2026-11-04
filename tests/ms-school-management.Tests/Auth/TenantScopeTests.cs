@@ -12,11 +12,11 @@ public class TenantScopeTests
     private static readonly Guid SchoolId = Guid.NewGuid();
 
     [Test]
-    public void TenantProvider_UsuarioSinRoleId_SeFiltra()
+    public void TenantProvider_UsuarioSinRoleId_NoSeFiltra()
     {
         var tenant = TenantFor(Authenticated());
 
-        Assert.That(tenant.ShouldFilter, Is.True);
+        Assert.That(tenant.ShouldFilter, Is.False);
     }
 
     [Test]
